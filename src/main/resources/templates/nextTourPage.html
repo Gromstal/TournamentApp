@@ -22,7 +22,7 @@
 
         table {
             border-collapse: collapse;
-            width: 100%;
+            width: 60%;
         }
 
         th, td {
@@ -52,7 +52,6 @@
         </tr>
         </thead>
         <tbody>
-        <tr><td colspan="5" style="height: 10px;"></td></tr>
         </tbody>
         <th:block th:each="pair, pairStat : ${pairsWrapper.pairs}">
             <tbody class="pair-block">
@@ -75,19 +74,44 @@
     </table>
 
     <div style="text-align: center; margin-top: 20px;">
-        <button type="submit">Посчитать очки и перейти к следующему туру</button>
+        <button type="submit">Подвести итог</button>
     </div>
 </form>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+
+
         document.querySelectorAll("input[type='number']").forEach(function (input) {
             input.addEventListener("focus", function () {
                 this.value = "";
             });
         });
+
+
+        document.querySelectorAll("form").forEach(function(form) {
+            form.addEventListener("submit", function(event) {
+                let emptyFound = false;
+
+                this.querySelectorAll("input[type='number']").forEach(function(input) {
+                    if (input.value.trim() === "") {
+                        emptyFound = true;
+                        input.classList.add("error");
+                    } else {
+                        input.classList.remove("error");
+                    }
+                });
+
+                if (emptyFound) {
+                    event.preventDefault();
+                    alert("Пожалуйста, заполните все поля!");
+                }
+            });
+        });
+
     });
 </script>
+
 
 </body>
 </html>

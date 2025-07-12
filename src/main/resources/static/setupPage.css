@@ -26,13 +26,13 @@ input[type="text"]:focus {
     background-color: #e8f0ee;
 }
 
-h1 {
+h1, h2 {
     text-align: center;
     font-size: 36px;
     margin-bottom: 30px;
-    border-bottom: 2px solid #7aa7a1; /* мягкий бирюзовый акцент */
+    border-bottom: 2px solid #7aa7a1;
     padding-bottom: 10px;
-    color: #386b66; /* приглушённый тёмный бирюзовый */
+    color: #386b66;
     letter-spacing: 1px;
 }
 
