@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Список участников</title>
+    <link rel="stylesheet" href="setupPage.css">
+</head>
+<body>
+
+<h1>Список участников</h1>
+
+<form th:action="@{/}" method="post" th:object="${wrapper}">
+    <table id="playerTable">
+        <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Фракция</th>
+        </tr>
+        </thead>
+        <tbody id="playerTableBody">
+        <tr class="player-row" ondblclick="removeRow(this)" th:each="player, iterStat : ${wrapper.playerList}">
+            <td><input type="text" th:field="*{playerList[__${iterStat.index}__].name}" /></td>
+            <td><input type="text" th:field="*{playerList[__${iterStat.index}__].faction}" /></td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <div class="center-button">
+        <button type="button" onclick="addRow()">Добавить игрока</button>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <label for="tourCount">Количество туров:</label>
+        <input type="number" id="tourCount" name="tourCount" min="1" required>
+
+        <label>
+            <input type="checkbox" name="tourFlag"> Сформировать пары вручную
+        </label>
+
+    </div>
+
+
+    <div style="text-align: center; margin-top: 20px;">
+        <button type="submit">Сформировать пары</button>
+    </div>
+</form>
+
+
+<table style="display:none;">
+    <tbody>
+    <tr id="rowTemplate" class="player-row" ondblclick="removeRow(this)">
+        <td><input type="text" name="playerList[0].name" /></td>
+        <td><input type="text" name="playerList[0].faction" /></td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    function addRow() {
+        const tableBody = document.getElementById('playerTableBody');
+        const rowCount = tableBody.rows.length;
+
+
+        const template = document.getElementById('rowTemplate');
+        const newRow = template.cloneNode(true);
+        newRow.removeAttribute('id');
+        newRow.style.display = '';
+
+
+        const inputs = newRow.querySelectorAll('input');
+        inputs[0].setAttribute('name', `playerList[${rowCount}].name`);
+        inputs[1].setAttribute('name', `playerList[${rowCount}].faction`);
+
+        tableBody.appendChild(newRow);
+    }
+
+    function removeRow(row) {
+        row.remove();
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Пары игроков</title>
+    <link rel="stylesheet" href="tourPage.css">
+    <style>
+        .pair-block {
+            border: 2px solid #444;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .pair-block tr {
+            background-color: #f9f9f9;
+        }
+
+        .pair-block tr:first-child {
+            background-color: #e8f0fe;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Тур № [[${currentTour}]]</h2>
+
+<form th:action="@{/nextTour}" method="post" th:object="${pairsWrapper}">
+    <table>
+        <thead>
+        <tr>
+            <th>Игрок</th>
+            <th>ТР</th>
+            <th>VP</th>
+            <th>МР</th>
+            <th>AP</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr><td colspan="5" style="height: 10px;"></td></tr>
+        </tbody>
+        <th:block th:each="pair, pairStat : ${pairsWrapper.pairs}">
+            <tbody class="pair-block">
+            <tr>
+                <td th:text="${pair.firstPlayer.name}">Игрок 1</td>
+                <td th:text="${pair.firstPlayer.tp}">0</td>
+                <td th:text="${pair.firstPlayer.vp}">0</td>
+                <td><input type="number" th:field="*{pairs[__${pairStat.index}__].firstPlayer.mp}" /></td>
+                <td><input type="number" th:field="*{pairs[__${pairStat.index}__].firstPlayer.ap}" /></td>
+            </tr>
+            <tr>
+                <td th:text="${pair.secondPlayer.name}">Игрок 2</td>
+                <td th:text="${pair.secondPlayer.tp}">0</td>
+                <td th:text="${pair.secondPlayer.vp}">0</td>
+                <td><input type="number" th:field="*{pairs[__${pairStat.index}__].secondPlayer.mp}" /></td>
+                <td><input type="number" th:field="*{pairs[__${pairStat.index}__].secondPlayer.ap}" /></td>
+            </tr>
+            </tbody>
+        </th:block>
+    </table>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <button type="submit">Посчитать очки и перейти к следующему туру</button>
+    </div>
+</form>
+
+</body>
+</html>
