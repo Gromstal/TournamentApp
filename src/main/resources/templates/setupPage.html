@@ -72,6 +72,9 @@
         inputs[0].setAttribute('name', `playerList[${rowCount}].name`);
         inputs[1].setAttribute('name', `playerList[${rowCount}].faction`);
 
+        inputs[0].setAttribute('maxlength', '50');
+        inputs[1].setAttribute('maxlength', '50');
+
         tableBody.appendChild(newRow);
     }
 
