@@ -32,7 +32,7 @@
 </head>
 <body>
 
-<h2>Итоги турнира</h2>
+<h2>Итоги тура</h2>
 
 <table>
     <thead>
@@ -60,6 +60,12 @@
 
     </tbody>
 </table>
+<form th:action="@{/nextTour}" method="get">
+    <div style="text-align: center; margin-top: 20px;">
+        <button type="submit">К следующему туру</button>
+    </div>
+</form>
+
 
 </body>
 </html>

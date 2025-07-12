@@ -60,6 +60,6 @@ public class TourController {
         session.setAttribute("currentTour", (Integer)session.getAttribute("currentTour")+1);
         model.addAttribute("currentTour", session.getAttribute("currentTour"));
 
-        return "nextTourPage";
+        return "redirect:/subTotalResult";
     }
 }

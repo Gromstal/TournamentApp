@@ -57,7 +57,7 @@ th {
     border-bottom: 2px solid #7aa7a1;
 }
 
-/* Визуально выделяем каждую пару */
+
 tbody.pair-block {
     display: table-row-group;
     border: 2px solid #bbb4a1;
@@ -66,7 +66,7 @@ tbody.pair-block {
     overflow: hidden;
 }
 
-/* Убираем внутренние рамки */
+
 tbody.pair-block tr td {
     border-left: none;
     border-right: none;
