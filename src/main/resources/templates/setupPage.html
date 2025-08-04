@@ -19,8 +19,8 @@
         </thead>
         <tbody id="playerTableBody">
         <tr class="player-row" ondblclick="removeRow(this)" th:each="player, iterStat : ${wrapper.playerList}">
-            <td><input type="text" th:field="*{playerList[__${iterStat.index}__].name}" /></td>
-            <td><input type="text" th:field="*{playerList[__${iterStat.index}__].faction}" /></td>
+            <td><input type="text" th:field="*{playerList[__${iterStat.index}__].name}" maxlength="50"/></td>
+            <td><input type="text" th:field="*{playerList[__${iterStat.index}__].faction}" maxlength="50"/></td>
         </tr>
         </tbody>
     </table>
@@ -43,37 +43,36 @@
     </div>
 </form>
 
-<table style="display:none;">
-    <tbody>
-    <tr id="rowTemplate" class="player-row" ondblclick="removeRow(this)">
-        <td><input type="text" name="playerList[0].name" /></td>
-        <td><input type="text" name="playerList[0].faction" /></td>
+<template id="rowTemplate">
+    <tr class="player-row" ondblclick="removeRow(this)">
+        <td><input type="text" name="playerList[0].name" maxlength="50"/></td>
+        <td><input type="text" name="playerList[0].faction" maxlength="50"/></td>
     </tr>
-    </tbody>
-</table>
+</template>
 
 <script>
     function addRow() {
         const tableBody = document.getElementById('playerTableBody');
-        const rowCount = tableBody.rows.length;
-
         const template = document.getElementById('rowTemplate');
-        const newRow = template.cloneNode(true);
-        newRow.removeAttribute('id');
-        newRow.style.display = '';
-
-        const inputs = newRow.querySelectorAll('input');
-        inputs[0].setAttribute('name', `playerList[${rowCount}].name`);
-        inputs[1].setAttribute('name', `playerList[${rowCount}].faction`);
-
-        inputs[0].setAttribute('maxlength', '50');
-        inputs[1].setAttribute('maxlength', '50');
-
+        const newRow = document.importNode(template.content, true);
         tableBody.appendChild(newRow);
+        reindexRows();
     }
 
     function removeRow(row) {
         row.remove();
+        reindexRows();
+    }
+
+    function reindexRows() {
+        const rows = document.querySelectorAll('#playerTableBody .player-row');
+        rows.forEach((row, index) => {
+            const inputs = row.querySelectorAll('input');
+            if (inputs.length === 2) {
+                inputs[0].setAttribute('name', `playerList[${index}].name`);
+                inputs[1].setAttribute('name', `playerList[${index}].faction`);
+            }
+        });
     }
 
     document.getElementById('playerForm').addEventListener('submit', function (event) {
