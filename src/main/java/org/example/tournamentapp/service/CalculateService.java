@@ -1,12 +1,22 @@
 package org.example.tournamentapp.service;
 
+import lombok.RequiredArgsConstructor;
+import org.example.tournamentapp.entity.PlayerEntity;
 import org.example.tournamentapp.model.Player;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class CalculateService {
 
+    private final PlayerService playerService;
+
+    @Transactional
     public void calculate(Player first, Player second) {
+        PlayerEntity player1 =  playerService.getPlayerById(first.getId());
+        PlayerEntity player2 =  playerService.getPlayerById(second.getId());
+
         int newVpFirst = first.getVp() + first.getAp() + first.getMp();
         int newVpSecond = second.getVp() + second.getAp() + second.getMp();
 
@@ -18,17 +28,19 @@ public class CalculateService {
                 second.getTp(), newVpSecond, newVpFirst, second.getMp(), second.getAp(),
                 first.getMp(), first.getAp());
 
-        first.setTp(tpFirst);
-        second.setTp(tpSecond);
 
-        first.setVp(newVpFirst);
-        second.setVp(newVpSecond);
+        player1.setTp(tpFirst);
+        player1.setVp(newVpFirst);
+        player1.setTotalMp(player1.getTotalMp() + first.getMp());
+        player1.setTotalAp(player1.getTotalAp() + first.getAp());
 
-        first.setTotalMp(first.getTotalMp() + first.getMp());
-        first.setTotalAp(first.getTotalAp() + first.getAp());
+        player2.setTp(tpSecond);
+        player2.setVp(newVpSecond);
+        player2.setTotalMp(player2.getTotalMp() + second.getMp());
+        player2.setTotalAp(player2.getTotalAp() + second.getAp());
 
-        second.setTotalMp(second.getTotalMp() + second.getMp());
-        second.setTotalAp(second.getTotalAp() + second.getAp());
+        playerService.savePlayer(player1);
+        playerService.savePlayer(player2);
     }
 
     private int calculateTp(int currentTp, int newVp, int otherVp, int mp, int ap, int otherMp, int otherAp) {

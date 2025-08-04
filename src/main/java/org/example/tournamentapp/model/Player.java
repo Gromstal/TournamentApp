@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Player {
+    private Long id;
     private String name;
     private String faction;
 

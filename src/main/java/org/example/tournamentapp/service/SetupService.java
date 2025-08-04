@@ -2,16 +2,14 @@ package org.example.tournamentapp.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tournamentapp.builder.ProxyBotBuilder;
+import org.example.tournamentapp.entity.PlayerEntity;
 import org.example.tournamentapp.model.Pair;
 import org.example.tournamentapp.model.Player;
-import org.example.tournamentapp.wrapper.PairsWrapper;
 import org.example.tournamentapp.wrapper.PlayerListWrapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,8 +19,11 @@ public class SetupService {
     private final ProxyBotBuilder proxyBotBuilder;
     private final PlayerListWrapper playerListWrapper;
     private final TourService tourService;
+    private final PlayerService playerService;
+    private final TournamentService tournamentService;
 
     public List<Pair> createRandomPairList(List<Player> setupList) {
+        Map<Long,PlayerEntity> players = getPlayers();
         List<Player> playerList = setupList
                 .stream()
                 .filter(player -> !player.getName().isEmpty())
@@ -35,9 +36,12 @@ public class SetupService {
         for (int i = 0; i < playerList.size() - 1; i += 2) {
             pairList.add(new Pair(playerList.get(i), playerList.get(i + 1)));
             playerList.get(i).getNamesPlayed().add(playerList.get(i + 1).getName());
-            playerList.get(i+1).getNamesPlayed().add(playerList.get(i).getName());
+            playerList.get(i + 1).getNamesPlayed().add(playerList.get(i).getName());
+
+            PlayerEntity player = players.get(playerList.get(i).getId());
+            PlayerEntity opponent = players.get(playerList.get(i + 1).getId());
+            playerService.saveOpponents(player, opponent);
         }
-        System.out.println(pairList);
 
         return pairList;
     }
@@ -54,7 +58,7 @@ public class SetupService {
 
     public List<Pair> createTourPairList(List<Player> setupList) {
         List<Player> playerList = tourService.getSortedPlayerList(setupList);
-
+        Map<Long,PlayerEntity> players = getPlayers();
         List<Pair> pairList = new ArrayList<>();
 
         for (int i = 0; i < playerList.size() - 1; i++) {
@@ -72,6 +76,10 @@ public class SetupService {
                     playerList.get(i).getNamesPlayed().add(playerList.get(j).getName());
                     playerList.get(j).getNamesPlayed().add(playerList.get(i).getName());
 
+                    PlayerEntity player = players.get(playerList.get(i).getId());
+                    PlayerEntity opponent = players.get(playerList.get(j).getId());
+                    playerService.saveOpponents(player, opponent);
+
                     pairList.add(new Pair(playerList.get(i), playerList.get(j)));
                     break;
                 }
@@ -84,22 +92,25 @@ public class SetupService {
         return pairList;
     }
 
-    public List<Player> extractPlayersFromPairs(List<Pair> pairs) {
-        List<Player> players = new ArrayList<>();
-        for (Pair pair : pairs) {
-            if (pair.getFirstPlayer() != null) players.add(pair.getFirstPlayer());
-            if (pair.getSecondPlayer() != null) players.add(pair.getSecondPlayer());
-            pair.getFirstPlayer().getNamesPlayed().add(pair.getSecondPlayer().getName());
-            pair.getSecondPlayer().getNamesPlayed().add(pair.getFirstPlayer().getName());
-        }
-        return players;
-    }
-
     public PlayerListWrapper setupPlayerList() {
         playerListWrapper.setPlayerList(new ArrayList<>());
         return playerListWrapper;
     }
+
     public Player getProxyBot() {
         return proxyBotBuilder.getProxyBot();
+    }
+
+    public List<Player> getPlayerListWithPB(List<Player> setupList) {
+        if (setupList.size() % 2 != 0) {
+            setupList.add(getProxyBot());
+        }
+        return setupList;
+    }
+
+    private Map<Long,PlayerEntity> getPlayers(){
+        Long tournamentId = tournamentService.getTournamentIdByTourDate(LocalDate.now());
+        List<PlayerEntity> players = tournamentService.getAllPlayersByTournamentId(tournamentId);
+        return players.stream().collect(Collectors.toMap(PlayerEntity::getId, p -> p));
     }
 }
