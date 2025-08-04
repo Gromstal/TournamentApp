@@ -58,37 +58,38 @@ public class SetupService {
 
     public List<Pair> createTourPairList(List<Player> setupList) {
         List<Player> playerList = tourService.getSortedPlayerList(setupList);
-        Map<Long,PlayerEntity> players = getPlayers();
+        Map<Long, PlayerEntity> players = getPlayers();
         List<Pair> pairList = new ArrayList<>();
 
         for (int i = 0; i < playerList.size() - 1; i++) {
-            if (playerList.get(i).isInPair()) continue;
+            Player player1 = playerList.get(i);
+            if (player1.isInPair()) continue;
 
             for (int j = i + 1; j < playerList.size(); j++) {
+                Player player2 = playerList.get(j);
+                if (player2.isInPair()) continue;
 
-                if (playerList.get(j).isInPair()) continue;
-
-                if (!playerList.get(i).getNamesPlayed().contains(playerList.get(j).getName())) {
-
-                    playerList.get(i).setInPair(true);
-                    playerList.get(j).setInPair(true);
-
-                    playerList.get(i).getNamesPlayed().add(playerList.get(j).getName());
-                    playerList.get(j).getNamesPlayed().add(playerList.get(i).getName());
-
-                    PlayerEntity player = players.get(playerList.get(i).getId());
-                    PlayerEntity opponent = players.get(playerList.get(j).getId());
-                    playerService.saveOpponents(player, opponent);
-
-                    pairList.add(new Pair(playerList.get(i), playerList.get(j)));
+                if (!player1.getNamesPlayed().contains(player2.getName())) {
+                    createPair(pairList, players, player1, player2);
                     break;
                 }
             }
         }
 
+        List<Player> unpaired = playerList.stream()
+                .filter(p -> !p.isInPair())
+                .toList();
+
+        for (int i = 0; i < unpaired.size() - 1; i += 2) {
+            Player player1 = unpaired.get(i);
+            Player player2 = unpaired.get(i + 1);
+            createPair(pairList, players, player1, player2);
+        }
+
         for (Player player : playerList) {
             player.setInPair(false);
         }
+
         return pairList;
     }
 
@@ -106,6 +107,20 @@ public class SetupService {
             setupList.add(getProxyBot());
         }
         return setupList;
+    }
+
+    private void createPair(List<Pair> pairList, Map<Long, PlayerEntity> players, Player p1, Player p2) {
+        p1.setInPair(true);
+        p2.setInPair(true);
+
+        p1.getNamesPlayed().add(p2.getName());
+        p2.getNamesPlayed().add(p1.getName());
+
+        PlayerEntity entity1 = players.get(p1.getId());
+        PlayerEntity entity2 = players.get(p2.getId());
+        playerService.saveOpponents(entity1, entity2);
+
+        pairList.add(new Pair(p1, p2));
     }
 
     private Map<Long,PlayerEntity> getPlayers(){
