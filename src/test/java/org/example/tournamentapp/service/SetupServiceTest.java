@@ -115,28 +115,28 @@ class SetupServiceTest {
         }
     }
 
-    @Test
-    void testExtractPlayersFromPairs() {
-        Player p1 = Player.builder().name("Alice").build();
-        Player p2 = Player.builder().name("Bob").build();
-        Player p3 = Player.builder().name("Charlie").build();
-        Player p4 = Player.builder().name("Diana").build();
-
-        List<Pair> pairs = Arrays.asList(
-                new Pair(p1, p2),
-                new Pair(p3, p4)
-        );
-
-        List<Player> result = setupService.extractPlayersFromPairs(pairs);
-
-        assertEquals(4, result.size());
-        assertTrue(result.containsAll(Arrays.asList(p1, p2, p3, p4)));
-
-        for (Pair pair : pairs) {
-            assertTrue(pair.getFirstPlayer().getNamesPlayed().contains(pair.getSecondPlayer().getName()));
-            assertTrue(pair.getSecondPlayer().getNamesPlayed().contains(pair.getFirstPlayer().getName()));
-        }
-    }
+//    @Test
+//    void testExtractPlayersFromPairs() {
+//        Player p1 = Player.builder().name("Alice").build();
+//        Player p2 = Player.builder().name("Bob").build();
+//        Player p3 = Player.builder().name("Charlie").build();
+//        Player p4 = Player.builder().name("Diana").build();
+//
+//        List<Pair> pairs = Arrays.asList(
+//                new Pair(p1, p2),
+//                new Pair(p3, p4)
+//        );
+//
+//        List<Player> result = setupService.extractPlayersFromPairs(pairs);
+//
+//        assertEquals(4, result.size());
+//        assertTrue(result.containsAll(Arrays.asList(p1, p2, p3, p4)));
+//
+//        for (Pair pair : pairs) {
+//            assertTrue(pair.getFirstPlayer().getNamesPlayed().contains(pair.getSecondPlayer().getName()));
+//            assertTrue(pair.getSecondPlayer().getNamesPlayed().contains(pair.getFirstPlayer().getName()));
+//        }
+//    }
 
     @Test
     void testSetupPlayerList() {

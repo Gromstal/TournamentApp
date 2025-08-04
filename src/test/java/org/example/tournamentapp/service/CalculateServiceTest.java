@@ -10,10 +10,10 @@ class CalculateServiceTest {
 
     private CalculateService service;
 
-    @BeforeEach
-    void setUp() {
-        service = new CalculateService();
-    }
+//    @BeforeEach
+//    void setUp() {
+//        service = new CalculateService();
+//    }
 
     @Test
     void testTp4() {

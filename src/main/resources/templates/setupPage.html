@@ -9,7 +9,7 @@
 
 <h1>Список участников</h1>
 
-<form th:action="@{/}" method="post" th:object="${wrapper}">
+<form id="playerForm" th:action="@{/setup}" method="post" th:object="${wrapper}">
     <table id="playerTable">
         <thead>
         <tr>
@@ -25,7 +25,6 @@
         </tbody>
     </table>
 
-
     <div class="center-button">
         <button type="button" onclick="addRow()">Добавить игрока</button>
     </div>
@@ -37,15 +36,12 @@
         <label>
             <input type="checkbox" name="tourFlag"> Сформировать пары вручную
         </label>
-
     </div>
-
 
     <div style="text-align: center; margin-top: 20px;">
         <button type="submit">Сформировать пары</button>
     </div>
 </form>
-
 
 <table style="display:none;">
     <tbody>
@@ -61,12 +57,10 @@
         const tableBody = document.getElementById('playerTableBody');
         const rowCount = tableBody.rows.length;
 
-
         const template = document.getElementById('rowTemplate');
         const newRow = template.cloneNode(true);
         newRow.removeAttribute('id');
         newRow.style.display = '';
-
 
         const inputs = newRow.querySelectorAll('input');
         inputs[0].setAttribute('name', `playerList[${rowCount}].name`);
@@ -81,6 +75,37 @@
     function removeRow(row) {
         row.remove();
     }
+
+    document.getElementById('playerForm').addEventListener('submit', function (event) {
+        const nameInputs = document.querySelectorAll('#playerTableBody input[name$=".name"]');
+        const names = [];
+        let hasEmptyName = false;
+        let hasDuplicates = false;
+
+        nameInputs.forEach(input => {
+            const trimmedName = input.value.trim();
+            if (trimmedName === '') {
+                hasEmptyName = true;
+            } else {
+                if (names.includes(trimmedName)) {
+                    hasDuplicates = true;
+                } else {
+                    names.push(trimmedName);
+                }
+            }
+        });
+
+        if (hasEmptyName) {
+            alert('У всех игроков должно быть указано имя!');
+            event.preventDefault();
+            return;
+        }
+
+        if (hasDuplicates) {
+            alert('Имена игроков должны быть уникальными!');
+            event.preventDefault();
+        }
+    });
 </script>
 
 </body>
