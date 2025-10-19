@@ -48,6 +48,7 @@ public class PlayerMapper {
         playerEntity.setTp(player.getTp());
         playerEntity.setTotalAp(player.getTotalAp());
         playerEntity.setTotalMp(player.getTotalMp());
+        playerEntity.setVpOpp(player.getVpOpp());
 
         return playerEntity;
     }
@@ -80,6 +81,7 @@ public class PlayerMapper {
                 .ap(playerEntity.getAp())
                 .totalMp(playerEntity.getTotalMp())
                 .totalAp(playerEntity.getTotalAp())
+                .vpOpp(playerEntity.getVpOpp())
                 .build();
     }
 }

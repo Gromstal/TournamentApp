@@ -46,10 +46,12 @@ public class TourService {
         List<Player> list= setupList
                 .stream()
                 .filter(player -> !player.getName().isEmpty())
-                .sorted(Comparator.comparingInt(Player::getTp)
-                        .thenComparing(Player::getVp)
-                        .thenComparing(Player::getTotalMp)
-                        .thenComparing(Player::getTotalAp))
+                .sorted(
+                        Comparator.comparingInt(Player::getTp).reversed()
+                                .thenComparingInt(Player::getVpOpp)
+                                .thenComparingInt(Player::getVp).reversed()
+                                .thenComparingInt(Player::getTotalMp).reversed()
+                                .thenComparingInt(Player::getTotalAp).reversed())
                 .collect(Collectors.toCollection(ArrayList::new));
 
         Collections.reverse(list);

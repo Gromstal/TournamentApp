@@ -38,5 +38,6 @@ public class PlayerEntity {
 
     private int totalAp;
     private int totalMp;
+    private int vpOpp;
 
 }

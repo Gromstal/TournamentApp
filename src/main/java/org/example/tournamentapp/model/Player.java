@@ -27,6 +27,7 @@ public class Player {
 
     private int totalAp;
     private int totalMp;
+    private int vpOpp;
 
     @Builder.Default
     private boolean inPair=false;

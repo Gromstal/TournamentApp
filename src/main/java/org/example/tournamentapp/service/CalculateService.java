@@ -39,6 +39,9 @@ public class CalculateService {
         player2.setTotalMp(player2.getTotalMp() + second.getMp());
         player2.setTotalAp(player2.getTotalAp() + second.getAp());
 
+        player1.setVpOpp(player1.getVpOpp() + second.getAp() + second.getMp());
+        player2.setVpOpp(player2.getVpOpp() + first.getAp() + first.getMp());
+
         playerService.savePlayer(player1);
         playerService.savePlayer(player2);
     }
