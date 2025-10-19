@@ -1,7 +1,7 @@
 body {
-    background-color: #e8e6df; /* светлый пергаментный фон */
-    color: #2e3c39; /* глубокий серо-зелёный текст */
-    font-family: 'Georgia', serif; /* более атмосферный фэнтези-шрифт */
+    background-color: #e8e6df;
+    color: #2e3c39;
+    font-family: 'Georgia', serif;
     padding: 40px;
 }
 
@@ -95,6 +95,21 @@ button {
 }
 
 button:hover {
+    background-color: #5e8e88;
+    transform: scale(1.05);
+}
+
+.table-with-button {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 5px;
+}
+.add-player-btn {
+    width: 200px;
+}
+
+.add-player-btn:hover {
     background-color: #5e8e88;
     transform: scale(1.05);
 }

@@ -38,7 +38,7 @@ table {
     width: 60%;
     margin: 0 auto;
     border-collapse: separate;
-    border-spacing: 0 20px; /* отступ между парами */
+    border-spacing: 0 20px;
     background-color: transparent;
 }
 

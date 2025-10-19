@@ -10,23 +10,23 @@
 <h1>Список участников</h1>
 
 <form id="playerForm" th:action="@{/setup}" method="post" th:object="${wrapper}">
-    <table id="playerTable">
-        <thead>
-        <tr>
-            <th>Имя</th>
-            <th>Фракция</th>
-        </tr>
-        </thead>
-        <tbody id="playerTableBody">
-        <tr class="player-row" ondblclick="removeRow(this)" th:each="player, iterStat : ${wrapper.playerList}">
-            <td><input type="text" th:field="*{playerList[__${iterStat.index}__].name}" maxlength="50"/></td>
-            <td><input type="text" th:field="*{playerList[__${iterStat.index}__].faction}" maxlength="50"/></td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="table-with-button" style="position: relative; width: 70%; margin: 0 auto;">
+        <table id="playerTable">
+            <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Фракция</th>
+            </tr>
+            </thead>
+            <tbody id="playerTableBody">
+            <tr class="player-row" ondblclick="removeRow(this)" th:each="player, iterStat : ${wrapper.playerList}">
+                <td><input type="text" th:field="*{playerList[__${iterStat.index}__].name}" maxlength="50"/></td>
+                <td><input type="text" th:field="*{playerList[__${iterStat.index}__].faction}" maxlength="50"/></td>
+            </tr>
+            </tbody>
+        </table>
 
-    <div class="center-button">
-        <button type="button" onclick="addRow()">Добавить игрока</button>
+        <button type="button" class="add-player-btn" style="position: absolute; top: 0; left: 95%;" onclick="addRow() ">Добавить игрока</button>
     </div>
 
     <div style="text-align: center; margin-top: 20px;">
@@ -42,6 +42,7 @@
         <button type="submit">Сформировать пары</button>
     </div>
 </form>
+
 
 <template id="rowTemplate">
     <tr class="player-row" ondblclick="removeRow(this)">
