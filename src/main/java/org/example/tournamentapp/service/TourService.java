@@ -48,8 +48,8 @@ public class TourService {
                 .filter(player -> !player.getName().isEmpty())
                 .sorted(
                         Comparator.comparingInt(Player::getTp).reversed()
-                                .thenComparingInt(Player::getVpOpp)
                                 .thenComparingInt(Player::getVp).reversed()
+                                .thenComparingInt(Player::getVpOpp)
                                 .thenComparingInt(Player::getTotalMp).reversed()
                                 .thenComparingInt(Player::getTotalAp).reversed())
                 .collect(Collectors.toCollection(ArrayList::new));
