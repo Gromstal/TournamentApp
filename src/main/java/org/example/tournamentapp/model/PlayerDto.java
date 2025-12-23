@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Player {
+public class PlayerDto {
     private Long id;
     private String name;
     private String faction;
@@ -32,6 +32,13 @@ public class Player {
     @Builder.Default
     private boolean inPair=false;
 
-    public Player(String name1, String faction1, int i, int i1, int i2, int i3) {
+    public PlayerDto(String name, String faction, int TP, int VP, int VPopp, int totalAp, int totalMp) {
+        this.name = name;
+        this.faction = faction;
+        this.tp = TP;
+        this.vp = VP;
+        this.vpOpp = VPopp;
+        this.totalAp = totalAp;
+        this.totalMp = totalMp;
     }
 }

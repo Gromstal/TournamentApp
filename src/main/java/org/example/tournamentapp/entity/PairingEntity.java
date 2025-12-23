@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PUBLIC, force = true)
-public class Pairing {
+public class PairingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pairing_seq")

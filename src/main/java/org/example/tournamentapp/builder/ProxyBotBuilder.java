@@ -1,6 +1,6 @@
 package org.example.tournamentapp.builder;
 
-import org.example.tournamentapp.model.Player;
+import org.example.tournamentapp.model.PlayerDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -8,8 +8,8 @@ import java.util.ArrayList;
 @Component
 public class ProxyBotBuilder {
 
-    public Player getProxyBot() {
-        return Player.builder()
+    public PlayerDto getProxyBot() {
+        return PlayerDto.builder()
                 .name("Proxy Bot")
                 .faction("ProxyBot faction")
                 .tp(0)

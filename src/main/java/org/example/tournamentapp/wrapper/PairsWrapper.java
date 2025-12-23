@@ -3,7 +3,7 @@ package org.example.tournamentapp.wrapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.tournamentapp.model.Pair;
+import org.example.tournamentapp.model.PairDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 @Component
 public class PairsWrapper {
-    private List<Pair> pairs;
+    private List<PairDto> pairs;
 }

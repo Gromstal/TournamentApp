@@ -3,8 +3,8 @@ package org.example.tournamentapp.controller;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.tournamentapp.model.Player;
-import org.example.tournamentapp.service.TourService;
+import org.example.tournamentapp.model.PlayerDto;
+import org.example.tournamentapp.service.SortingPlayerService;
 import org.example.tournamentapp.wrapper.PlayerListWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,14 +18,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubTotalController {
 
-    private final TourService tourService;
+    private final SortingPlayerService sortingPlayerService;
 
     @GetMapping
     public String getSubTotalPage(Model model, HttpSession session) {
         PlayerListWrapper wrapper = new PlayerListWrapper();
 
-        List<Player> players = (List<Player>) session.getAttribute("players");
-        wrapper.setPlayerList(tourService.getFinalSortedList(players));
+        List<PlayerDto> playerDtos = (List<PlayerDto>) session.getAttribute("players");
+        wrapper.setPlayerList(sortingPlayerService.getSortedPlayerList(playerDtos));
 
         model.addAttribute("wrapper", wrapper);
         model.addAttribute("currentTour", session.getAttribute("currentTour"));

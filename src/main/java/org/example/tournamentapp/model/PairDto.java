@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.tournamentapp.entity.Tournament;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Pair {
-    private Player firstPlayer;
-    private Player secondPlayer;
+public class PairDto {
+    private PlayerDto firstPlayer;
+    private PlayerDto secondPlayer;
 }

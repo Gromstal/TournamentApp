@@ -2,11 +2,9 @@ package org.example.tournamentapp.controller;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.tournamentapp.model.Pair;
-import org.example.tournamentapp.model.Player;
-import org.example.tournamentapp.service.PairingService;
-import org.example.tournamentapp.service.SetupService;
-import org.example.tournamentapp.service.TournamentService;
+import org.example.tournamentapp.model.PairDto;
+import org.example.tournamentapp.model.PlayerDto;
+import org.example.tournamentapp.service.*;
 import org.example.tournamentapp.wrapper.PlayerListWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +19,8 @@ public class TournamentSetupController {
 
     private final SetupService setupService;
     private final TournamentService tournamentService;
-    private final PairingService pairingService;
+    private final TournamentCreatingService tournamentCreatingService;
+
 
     @GetMapping()
     public String tournamentSetup(Model model) {
@@ -35,17 +34,16 @@ public class TournamentSetupController {
                             @RequestParam("tourCount") int tourCount,
                             @RequestParam(value = "tourFlag", required = false) String tourFlag) {
 
-        List<Player> playerList = setupService.getPlayerListWithPB(wrapper.getPlayerList());
-        Long tournamentId = tournamentService.createTournament(playerList, tourCount);
-        playerList = tournamentService.getPlayersDTO();
+        List<PlayerDto> playerDtoList = setupService.setupPlayerListWithPB(wrapper.getPlayerList());
+        Long tournamentId = tournamentCreatingService.createTournament(playerDtoList, tourCount);
+        playerDtoList = tournamentService.getPlayersDTO();
 
         if (tourFlag != null) {
-            session.setAttribute("players", playerList);
+            session.setAttribute("players", playerDtoList);
             return "redirect:/hsetup";
         }
 
-        List<Pair> pairs = setupService.createRandomPairList(playerList);
-        pairingService.savePairingList(pairs, tournamentId);
+        tournamentCreatingService.saveStartingPairingList(playerDtoList, tournamentId);
 
         return "redirect:/nextTour";
     }

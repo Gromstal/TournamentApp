@@ -2,7 +2,9 @@ package org.example.tournamentapp.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tournamentapp.entity.PlayerEntity;
-import org.example.tournamentapp.model.Player;
+import org.example.tournamentapp.model.PairDto;
+import org.example.tournamentapp.model.PlayerDto;
+import org.example.tournamentapp.wrapper.PairsWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,37 +15,45 @@ public class CalculateService {
     private final PlayerService playerService;
 
     @Transactional
-    public void calculate(Player first, Player second) {
-        PlayerEntity player1 =  playerService.getPlayerById(first.getId());
-        PlayerEntity player2 =  playerService.getPlayerById(second.getId());
+    public void calculateFromPairsWrapper(PairsWrapper pairsWrapper) {
+        for (PairDto pair : pairsWrapper.getPairs()) {
+            calculate(pair.getFirstPlayer(), pair.getSecondPlayer());
+        }
 
-        int newVpFirst = first.getVp() + first.getAp() + first.getMp();
-        int newVpSecond = second.getVp() + second.getAp() + second.getMp();
+    }
 
-        int tpFirst = calculateTp(
-                first.getTp(), newVpFirst, newVpSecond, first.getMp(), first.getAp(),
-                second.getMp(), second.getAp());
+    @Transactional
+    public void calculate(PlayerDto firstPlayerResult, PlayerDto secondPlayerResult) {
+        PlayerEntity firstPlayer =  playerService.getPlayerById(firstPlayerResult.getId());
+        PlayerEntity secondPlayer =  playerService.getPlayerById(secondPlayerResult.getId());
 
-        int tpSecond = calculateTp(
-                second.getTp(), newVpSecond, newVpFirst, second.getMp(), second.getAp(),
-                first.getMp(), first.getAp());
+        int firstPlayerEarnedVP = firstPlayerResult.getAp() + firstPlayerResult.getMp();
+        int secondPlayerEarnedVP = secondPlayerResult.getAp() + secondPlayerResult.getMp();
+
+        int firstPlayerCalculatedTP = calculateTp(
+                firstPlayerResult.getTp(), firstPlayerEarnedVP, secondPlayerEarnedVP, firstPlayerResult.getMp(), firstPlayerResult.getAp(),
+                secondPlayerResult.getMp(), secondPlayerResult.getAp());
+
+        int secondPlayerCalculatedTP = calculateTp(
+                secondPlayerResult.getTp(), secondPlayerEarnedVP, firstPlayerEarnedVP, secondPlayerResult.getMp(), secondPlayerResult.getAp(),
+                firstPlayerResult.getMp(), firstPlayerResult.getAp());
 
 
-        player1.setTp(tpFirst);
-        player1.setVp(newVpFirst);
-        player1.setTotalMp(player1.getTotalMp() + first.getMp());
-        player1.setTotalAp(player1.getTotalAp() + first.getAp());
+        firstPlayer.setTp(firstPlayerCalculatedTP);
+        firstPlayer.setVp(firstPlayerResult.getVp() + firstPlayerEarnedVP);
+        firstPlayer.setTotalMp(firstPlayer.getTotalMp() + firstPlayerResult.getMp());
+        firstPlayer.setTotalAp(firstPlayer.getTotalAp() + firstPlayerResult.getAp());
 
-        player2.setTp(tpSecond);
-        player2.setVp(newVpSecond);
-        player2.setTotalMp(player2.getTotalMp() + second.getMp());
-        player2.setTotalAp(player2.getTotalAp() + second.getAp());
+        secondPlayer.setTp(secondPlayerCalculatedTP);
+        secondPlayer.setVp(secondPlayerResult.getVp() + secondPlayerEarnedVP);
+        secondPlayer.setTotalMp(secondPlayer.getTotalMp() + secondPlayerResult.getMp());
+        secondPlayer.setTotalAp(secondPlayer.getTotalAp() + secondPlayerResult.getAp());
 
-        player1.setVpOpp(player1.getVpOpp() + second.getAp() + second.getMp());
-        player2.setVpOpp(player2.getVpOpp() + first.getAp() + first.getMp());
+        firstPlayer.setVpOpp(firstPlayer.getVpOpp() + secondPlayerResult.getAp() + secondPlayerResult.getMp());
+        secondPlayer.setVpOpp(secondPlayer.getVpOpp() + firstPlayerResult.getAp() + firstPlayerResult.getMp());
 
-        playerService.savePlayer(player1);
-        playerService.savePlayer(player2);
+        playerService.savePlayer(firstPlayer);
+        playerService.savePlayer(secondPlayer);
     }
 
     private int calculateTp(int currentTp, int newVp, int otherVp, int mp, int ap, int otherMp, int otherAp) {

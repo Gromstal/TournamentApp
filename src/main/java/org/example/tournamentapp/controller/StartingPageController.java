@@ -26,7 +26,6 @@ public class StartingPageController {
 
     @PostMapping
     public String startingPageSubmit() {
-
-            return "redirect:/nextTour";
+        return "redirect:/nextTour";
     }
 }

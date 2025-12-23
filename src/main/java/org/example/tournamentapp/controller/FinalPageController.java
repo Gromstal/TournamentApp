@@ -2,7 +2,7 @@ package org.example.tournamentapp.controller;
 
 
 import lombok.RequiredArgsConstructor;
-import org.example.tournamentapp.service.TourService;
+import org.example.tournamentapp.service.SortingPlayerService;
 import org.example.tournamentapp.service.TournamentService;
 import org.example.tournamentapp.wrapper.PlayerListWrapper;
 import org.springframework.stereotype.Controller;
@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class FinalPageController {
 
     private final TournamentService tournamentService;
-    private final TourService tourService;
+    private final SortingPlayerService sortingPlayerService;
 
     @GetMapping
     public String finalPage(Model model) {
         PlayerListWrapper wrapper = new PlayerListWrapper();
-        wrapper.setPlayerList(tourService.getFinalSortedList(tournamentService.getPlayersDTO()));
+        wrapper.setPlayerList(sortingPlayerService.getSortedPlayerList(tournamentService.getPlayersDTO()));
         model.addAttribute("wrapper", wrapper);
         return "finalPage";
     }

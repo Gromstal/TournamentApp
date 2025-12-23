@@ -2,12 +2,9 @@ package org.example.tournamentapp.controller;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.tournamentapp.model.Pair;
-import org.example.tournamentapp.model.Player;
-import org.example.tournamentapp.service.PairingService;
-import org.example.tournamentapp.service.SetupService;
-import org.example.tournamentapp.service.TourService;
-import org.example.tournamentapp.service.TournamentService;
+import org.example.tournamentapp.model.PairDto;
+import org.example.tournamentapp.model.Tour;
+import org.example.tournamentapp.service.*;
 import org.example.tournamentapp.wrapper.PairsWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,10 +21,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TourController {
 
-    private final TourService tourService;
-    private final SetupService setupService;
     private final PairingService pairingService;
     private final TournamentService tournamentService;
+    private final CalculateService calculateService;
+    private final CreatingPairingService creatingPairingService;
 
     @GetMapping
     public String showTourPage(Model model) {
@@ -36,7 +33,7 @@ public class TourController {
         }
 
         int currentTour = tournamentService.getCurrentTourByTourDate(LocalDate.now());
-        List<Pair> pairs = pairingService.getPairsFromDB(currentTour);
+        List<PairDto> pairs = pairingService.getPairingList(currentTour);
 
         PairsWrapper wrapper = new PairsWrapper();
         wrapper.setPairs(pairs);
@@ -50,30 +47,17 @@ public class TourController {
     @PostMapping()
     public String calculateScores(@ModelAttribute PairsWrapper pairsWrapper, Model model, HttpSession session) {
 
-        int currentTour = tournamentService.getCurrentTourByTourDate(LocalDate.now());
-        int total = tournamentService.getTourCountByTourDate(LocalDate.now());
-        List<Pair> pairs = pairingService.getPairsFromDB(currentTour);
-        Long tournamentId = tournamentService.getTournamentIdByTourDate(LocalDate.now());
+        Tour tour = tournamentService.processingTournament(pairsWrapper);
 
-        tourService.mergePairs(pairs, pairsWrapper);
-        tourService.calculateTourPoints(new PairsWrapper(pairs));
-
-        if (currentTour == total) {
-            tournamentService.saveIsEnded();
+        if (tour.ended()) {
             return "redirect:/finalPage";
         }
 
-        List<Pair> newPairs = setupService.createTourPairList(tournamentService.getPlayersDTO());
+        model.addAttribute("pairsWrapper", new PairsWrapper(tour.newPairs()));
+        model.addAttribute("currentTour", tour.updatedTour());
 
-        int newTour = tournamentService.updateCurrentTour(tournamentId);
-        pairingService.savePairingList(newPairs, tournamentId);
-
-        model.addAttribute("pairsWrapper", new PairsWrapper(newPairs));
-        model.addAttribute("currentTour", newTour);
-
-        List<Player> players = tournamentService.getPlayersDTO();
-        session.setAttribute("players", players);
-        session.setAttribute("currentTour", newTour);
+        session.setAttribute("players", tour.players());
+        session.setAttribute("currentTour", tour.updatedTour());
 
         return "redirect:/subTotalResult";
     }
