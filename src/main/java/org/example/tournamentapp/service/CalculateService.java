@@ -24,8 +24,8 @@ public class CalculateService {
 
     @Transactional
     public void calculate(PlayerDto firstPlayerResult, PlayerDto secondPlayerResult) {
-        PlayerEntity firstPlayer =  playerService.getPlayerById(firstPlayerResult.getId());
-        PlayerEntity secondPlayer =  playerService.getPlayerById(secondPlayerResult.getId());
+        PlayerEntity firstPlayer = playerService.getPlayerById(firstPlayerResult.getId());
+        PlayerEntity secondPlayer = playerService.getPlayerById(secondPlayerResult.getId());
 
         int firstPlayerEarnedVP = firstPlayerResult.getAp() + firstPlayerResult.getMp();
         int secondPlayerEarnedVP = secondPlayerResult.getAp() + secondPlayerResult.getMp();
@@ -59,7 +59,7 @@ public class CalculateService {
     private int calculateTp(int currentTp, int newVp, int otherVp, int mp, int ap, int otherMp, int otherAp) {
         boolean allGreater = newVp > otherVp && mp > otherMp && ap > otherAp;
         boolean vpGreater = newVp > otherVp;
-        boolean mpOrApNotStrictlyGreater = !(mp > otherMp && ap > otherAp);
+        boolean mpOrApNotStrictlyGreater = (mp >= otherMp || ap >= otherAp);
         boolean vpEqual = newVp == otherVp;
         boolean vpLess = newVp < otherVp;
         boolean mpOrApAtLeastEqual = (mp >= otherMp) || (ap >= otherAp);

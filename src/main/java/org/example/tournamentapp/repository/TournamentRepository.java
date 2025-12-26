@@ -10,6 +10,7 @@ import java.util.Optional;
 
 
 public interface TournamentRepository extends JpaRepository<Tournament, Long> {
+
     Optional<Tournament> getTournamentByTourDate(LocalDate tourDate);
 
     @Query("SELECT t.id FROM Tournament t WHERE t.tourDate = :tourDate")

@@ -24,28 +24,29 @@ public class TournamentService {
     private final PlayerRepository playerRepository;
     private final PairingRepository pairingRepository;
     private final CreatingPairingService creatingPairingService;
-    private final PairingService pairingService;
+    private final MergePairingService mergePairingService;
     private final CalculateService calculateService;
+    private final SavePairingService savePairingService;
 
-    public Tour processingTournament(PairsWrapper pairsWrapper) {
+    public TourContext processingTournament(PairsWrapper pairsWrapper) {
 
         TournamentContext tournamentContext = getTournamentContext();
-        List<PairDto> pairs = pairingService.getPairingList(tournamentContext.currentTour());
+        List<PairDto> pairs = mergePairingService.getPairingList(tournamentContext.currentTour());
 
-        pairingService.mergePairs(pairs, pairsWrapper);
+        mergePairingService.mergePairs(pairs, pairsWrapper);
         calculateService.calculateFromPairsWrapper(new PairsWrapper(pairs));
 
         if (tournamentContext.currentTour() == tournamentContext.total()) {
             saveIsEnded();
-            return new Tour(true, tournamentContext.currentTour(), List.of(), List.of());
+            return new TourContext(true, tournamentContext.currentTour(), List.of(), List.of());
         }
 
         List<PlayerDto> players = getPlayersDTO();
         List<PairDto> newPairs = creatingPairingService.createTourPairList(players);
         int updatedTour = updateCurrentTour(tournamentContext.tournamentId());
-        pairingService.savePairingList(newPairs, tournamentContext.tournamentId());
+        savePairingService.savePairingList(newPairs, tournamentContext.tournamentId());
 
-        return new Tour(false, updatedTour, newPairs, players);
+        return new TourContext(false, updatedTour, newPairs, players);
     }
 
     public int updateCurrentTour(Long tournamentId) {
@@ -80,10 +81,6 @@ public class TournamentService {
 
     public List<LocalDate> getAllTournamentDates() {
         return tournamentRepository.findAll().stream().map(Tournament::getTourDate).collect(Collectors.toList());
-    }
-
-    public int getCurrentTourByTournamentId(Long tournamentId) {
-        return tournamentRepository.getCurrentTourById(tournamentId);
     }
 
     public int getCurrentTourByTourDate(LocalDate tourDate) {

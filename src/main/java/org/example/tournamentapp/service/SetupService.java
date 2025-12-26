@@ -21,11 +21,8 @@ public class SetupService {
         return playerListWrapper;
     }
 
-    public List<PlayerDto> setupPlayerListWithPB(List<PlayerDto> setupList) {
-        if (setupList.size() % 2 != 0) {
-            setupList.add(proxyBotService.getProxyBot());
-        }
-        return setupList;
+    public List<PlayerDto> setupPlayerListWithProxyBot(List<PlayerDto> setupList) {
+        return proxyBotService.getPlayerListWithProxyBot(setupList);
     }
 
 }

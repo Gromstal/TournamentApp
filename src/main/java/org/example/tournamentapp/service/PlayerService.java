@@ -3,6 +3,7 @@ package org.example.tournamentapp.service;
 import lombok.RequiredArgsConstructor;
 import org.example.tournamentapp.entity.PlayerEntity;
 import org.example.tournamentapp.repository.PlayerRepository;
+import org.example.tournamentapp.repository.TournamentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
-    private final TournamentService tournamentService;
+    private final TournamentRepository tournamentRepository;
 
     public void savePlayer(PlayerEntity player) {
         playerRepository.save(player);
@@ -36,8 +37,14 @@ public class PlayerService {
     }
 
     public Map<Long,PlayerEntity> getPlayers(){
-        Long tournamentId = tournamentService.getTournamentIdByTourDate(LocalDate.now());
-        List<PlayerEntity> players = tournamentService.getAllPlayersByTournamentId(tournamentId);
+        Long tournamentId = tournamentRepository.getTournamentIdByTourDate(LocalDate.now());
+        List<PlayerEntity> players = playerRepository.findAllByTournamentId(tournamentId);
         return players.stream().collect(Collectors.toMap(PlayerEntity::getId, p -> p));
+    }
+
+    public Map<String,Long> getPlayersIdByName(){
+        Long tournamentId = tournamentRepository.getTournamentIdByTourDate(LocalDate.now());
+        List<PlayerEntity> players = playerRepository.findAllByTournamentId(tournamentId);
+        return players.stream().collect(Collectors.toMap(PlayerEntity::getName, PlayerEntity::getId));
     }
 }

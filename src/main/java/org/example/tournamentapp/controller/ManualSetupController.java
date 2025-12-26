@@ -17,13 +17,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ManualSetupController {
 
-    private final PairingService pairingService;
+    private final MergePairingService mergePairingService;
     private final CreatingPairingService creatingPairingService;
     private final ManualSetupService manualSetupService;
 
 
     @GetMapping()
-    public String manualSetup(Model model, HttpSession session) {
+    public String getManualSetup(Model model, HttpSession session) {
         List<PlayerDto> playerDtoList = (List<PlayerDto>) session.getAttribute("players");
         List<PairDto> pairs = creatingPairingService.createManualPairList(playerDtoList);
 
@@ -37,7 +37,7 @@ public class ManualSetupController {
 
     @PostMapping
     public String saveManualPairing(@ModelAttribute("pairsWrapper") PairsWrapper wrapper, HttpSession session) {
-        List<PairDto> pairs = pairingService.syncPairs(wrapper.getPairs());
+        List<PairDto> pairs = mergePairingService.syncPairs(wrapper.getPairs());
         session.setAttribute("pairs", pairs);
         manualSetupService.saveManualSetup(pairs);
 

@@ -11,13 +11,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ManualSetupService {
 
-    private final PairingService pairingService;
     private final TournamentService tournamentService;
+    private final SavePairingService savePairingService;
 
     public void saveManualSetup(List<PairDto> pairs) {
         Long id = tournamentService.getTournamentIdByTourDate(LocalDate.now());
-        pairingService.savePairingList(pairs, id);
-        pairingService.saveOpponentsManualSetup(pairs);
+        savePairingService.savePairingList(pairs, id);
+        savePairingService.saveOpponentsManualSetup(pairs);
     }
 
 }

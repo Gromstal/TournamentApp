@@ -2,7 +2,6 @@ package org.example.tournamentapp.controller;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.tournamentapp.model.PairDto;
 import org.example.tournamentapp.model.PlayerDto;
 import org.example.tournamentapp.service.*;
 import org.example.tournamentapp.wrapper.PlayerListWrapper;
@@ -34,7 +33,7 @@ public class TournamentSetupController {
                             @RequestParam("tourCount") int tourCount,
                             @RequestParam(value = "tourFlag", required = false) String tourFlag) {
 
-        List<PlayerDto> playerDtoList = setupService.setupPlayerListWithPB(wrapper.getPlayerList());
+        List<PlayerDto> playerDtoList = setupService.setupPlayerListWithProxyBot(wrapper.getPlayerList());
         Long tournamentId = tournamentCreatingService.createTournament(playerDtoList, tourCount);
         playerDtoList = tournamentService.getPlayersDTO();
 

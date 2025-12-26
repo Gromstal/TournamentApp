@@ -54,53 +54,113 @@ public class CreatingPairingService {
     }
 
     public List<PairDto> createTourPairList(List<PlayerDto> setupList) {
-        List<PlayerDto> playerDtoList = sortingPlayerService.getSortedPlayerList(setupList);
-        Map<Long, PlayerEntity> players = playerService.getPlayers();
-        List<PairDto> pairList = new ArrayList<>();
+        List<PlayerDto> playersSorted = sortingPlayerService.getSortedPlayerList(setupList);
+        Map<Long, PlayerEntity> playersById = playerService.getPlayers();
 
-        for (int i = 0; i < playerDtoList.size() - 1; i++) {
-            PlayerDto playerDto1 = playerDtoList.get(i);
-            if (playerDto1.isInPair()) continue;
+        resetPairs(playersSorted);
 
-            for (int j = i + 1; j < playerDtoList.size(); j++) {
-                PlayerDto playerDto2 = playerDtoList.get(j);
-                if (playerDto2.isInPair()) continue;
+        List<PairDto> bestPairs = new ArrayList<>();
+        int[] bestCost = {Integer.MAX_VALUE};
 
-                if (!playerDto1.getNamesPlayed().contains(playerDto2.getName())) {
-                    createPair(pairList, players, playerDto1, playerDto2);
-                    break;
-                }
+        buildPairs(playersSorted, new ArrayList<>(), 0, bestPairs, bestCost);
+
+        resetPairs(playersSorted);
+
+        if (!bestPairs.isEmpty()) {
+            finalizePairs(bestPairs, playersById);
+        }
+        return bestPairs;
+    }
+
+    private boolean buildPairs(List<PlayerDto> players,
+                               List<PairDto> currentPairs,
+                               int currentCost,
+                               List<PairDto> bestPairs,
+                               int[] bestCost) {
+
+        if (currentCost >= bestCost[0]) return false;
+
+        int firstFreeIndex = findFirstFreeIndex(players);
+        if (firstFreeIndex == -1) {
+            bestCost[0] = currentCost;
+            bestPairs.clear();
+            bestPairs.addAll(currentPairs);
+            return true;
+        }
+
+        PlayerDto p1 = players.get(firstFreeIndex);
+        p1.setInPair(true);
+
+        List<Integer> candidates = findCandidates(players, firstFreeIndex, p1);
+        if (candidates.isEmpty()) {
+            p1.setInPair(false);
+            return false;
+        }
+
+        boolean foundAny = false;
+
+        for (int j : candidates) {
+            PlayerDto p2 = players.get(j);
+            p2.setInPair(true);
+
+            currentPairs.add(new PairDto(p1, p2));
+            int addCost = Math.abs(firstFreeIndex - j);
+
+            boolean branchOk = buildPairs(players, currentPairs, currentCost + addCost, bestPairs, bestCost);
+            foundAny |= branchOk;
+
+            currentPairs.remove(currentPairs.size() - 1);
+            p2.setInPair(false);
+
+            if (bestCost[0] == (players.size() / 2)) {
+                break;
             }
         }
 
-        List<PlayerDto> unpaired = playerDtoList.stream()
-                .filter(p -> !p.isInPair())
-                .toList();
-
-        for (int i = 0; i < unpaired.size() - 1; i += 2) {
-            PlayerDto playerDto1 = unpaired.get(i);
-            PlayerDto playerDto2 = unpaired.get(i + 1);
-            createPair(pairList, players, playerDto1, playerDto2);
-        }
-
-        for (PlayerDto playerDto : playerDtoList) {
-            playerDto.setInPair(false);
-        }
-
-        return pairList;
+        p1.setInPair(false);
+        return foundAny;
     }
 
-    private void createPair(List<PairDto> pairList, Map<Long, PlayerEntity> players, PlayerDto p1, PlayerDto p2) {
-        p1.setInPair(true);
-        p2.setInPair(true);
-
-        p1.getNamesPlayed().add(p2.getName());
-        p2.getNamesPlayed().add(p1.getName());
-
-        PlayerEntity entity1 = players.get(p1.getId());
-        PlayerEntity entity2 = players.get(p2.getId());
-        playerService.saveOpponents(entity1, entity2);
-
-        pairList.add(new PairDto(p1, p2));
+    private int findFirstFreeIndex(List<PlayerDto> players) {
+        for (int i = 0; i < players.size(); i++) {
+            if (!players.get(i).isInPair()) return i;
+        }
+        return -1;
     }
+
+    private List<Integer> findCandidates(List<PlayerDto> players, int fromIndex, PlayerDto p1) {
+        List<Integer> candidateIndexes = new ArrayList<>(3);
+
+        for (int j = fromIndex + 1; j < players.size(); j++) {
+            PlayerDto p2 = players.get(j);
+
+            if (p2.isInPair()) continue;
+            if (p1.getNamesPlayed().contains(p2.getName())) continue;
+
+            candidateIndexes.add(j);
+            if (candidateIndexes.size() == 3) break;
+        }
+        return candidateIndexes;
+    }
+
+    private void resetPairs(List<PlayerDto> players) {
+        for (PlayerDto p : players) {
+            p.setInPair(false);
+        }
+    }
+
+    private void finalizePairs(List<PairDto> pairList, Map<Long, PlayerEntity> players) {
+        for (PairDto pair : pairList) {
+            PlayerDto p1 = pair.getFirstPlayer();
+            PlayerDto p2 = pair.getSecondPlayer();
+
+            p1.getNamesPlayed().add(p2.getName());
+            p2.getNamesPlayed().add(p1.getName());
+
+            PlayerEntity entity1 = players.get(p1.getId());
+            PlayerEntity entity2 = players.get(p2.getId());
+            playerService.saveOpponents(entity1, entity2);
+        }
+    }
+
 }

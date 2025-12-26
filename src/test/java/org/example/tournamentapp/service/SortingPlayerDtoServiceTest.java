@@ -18,19 +18,19 @@ class SortingPlayerDtoServiceTest {
     private final TestData testData = new TestData();
 
     @Test
-    void finalSortingTest() {
-        List<PlayerDto> sorted = sortingPlayerService.getSortedPlayerList(testData.getSetupPlayers());
+    void sortingTest() {
+        List<PlayerDto> sorted = sortingPlayerService.getSortedPlayerList(testData.getFinalResultList());
 
         assertThat(sorted)
                 .extracting(PlayerDto::getName)
                 .containsExactly(
                         "Паша",
-                        "Даня",
                         "Витя",
+                        "Даня",
                         "Настя",
                         "Михаил",
-                        "Иван",
                         "Тигран",
+                        "Иван",
                         "Евгений",
                         "Андрей П",
                         "Андрей Н"

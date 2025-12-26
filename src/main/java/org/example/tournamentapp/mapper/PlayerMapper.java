@@ -40,7 +40,6 @@ public class PlayerMapper {
                 .collect(Collectors.toList());
 
         playerEntity.setOpponents(opponentsEntities);
-
         playerEntity.setId(playerDto.getId());
         playerEntity.setAp(playerDto.getAp());
         playerEntity.setMp(playerDto.getMp());

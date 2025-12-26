@@ -21,10 +21,10 @@ public class TournamentCreatingService {
     private final PlayerMapper playerMapper;
     private final TournamentRepository tournamentRepository;
     private final TournamentService tournamentService;
-    private final PairingService pairingService;
     private final CreatingPairingService creatingPairingService;
+    private final SavePairingService savePairingService;
 
-    public Long createTournament(List<PlayerDto> playerDtos, int tourCount ) {
+    public Long createTournament(List<PlayerDto> playerDtos, int tourCount) {
         Tournament newTournament = tournamentBuilder.getNewTournament(
                 playerMapper.toEntityList(playerDtos),
                 tourCount);
@@ -36,7 +36,7 @@ public class TournamentCreatingService {
 
     public void saveStartingPairingList(List<PlayerDto> playerDtoList, Long tournamentId) {
         List<PairDto> pairs = creatingPairingService.createRandomPairList(playerDtoList);
-        pairingService.savePairingList(pairs, tournamentId);
+        savePairingService.savePairingList(pairs, tournamentId);
     }
 
 }

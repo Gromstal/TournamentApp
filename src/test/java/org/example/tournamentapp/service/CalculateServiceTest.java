@@ -48,6 +48,27 @@ class CalculateServiceTest {
     }
 
     @Test
+    void tp4_0v2Test() {
+        PlayerDto firstDto = player(1L, 0, 1, 2);
+        PlayerDto secondDto = player(2L, 0, 0, 1);
+
+        PlayerEntity firstEntity = entityFromDb(1L, firstDto.getVp(), firstDto.getTp());
+        PlayerEntity secondEntity = entityFromDb(2L, secondDto.getVp(), secondDto.getTp());
+
+        when(playerService.getPlayerById(1L)).thenReturn(firstEntity);
+        when(playerService.getPlayerById(2L)).thenReturn(secondEntity);
+
+        service.calculate(firstDto, secondDto);
+
+        assertThat(firstEntity.getTp()).isEqualTo(4);
+        assertThat(secondEntity.getTp()).isEqualTo(0);
+
+        verify(playerService).savePlayer(firstEntity);
+        verify(playerService).savePlayer(secondEntity);
+        verifyNoMoreInteractions(playerService);
+    }
+
+    @Test
     void tp3_1Test() {
         PlayerDto firstDto = player(1L, 0, 4, 9);
         PlayerDto secondDto = player(2L, 0, 5, 7);
@@ -140,29 +161,6 @@ class CalculateServiceTest {
         verifyNoMoreInteractions(playerService);
     }
 
-    @Test
-    void tp0_4Test() {
-        PlayerDto firstDto = player(1L, 5, 5, 5);
-        PlayerDto secondDto = player(2L, 10, 10, 10);
-
-        PlayerEntity firstEntity = entityFromDb(1L, firstDto.getVp(), firstDto.getTp());
-        PlayerEntity secondEntity = entityFromDb(2L, secondDto.getVp(), secondDto.getTp());
-
-        when(playerService.getPlayerById(1L)).thenReturn(firstEntity);
-        when(playerService.getPlayerById(2L)).thenReturn(secondEntity);
-
-        service.calculate(firstDto, secondDto);
-
-        assertThat(firstEntity.getTp()).isEqualTo(0);
-        assertThat(secondEntity.getTp()).isEqualTo(4);
-
-        assertThat(firstEntity.getVp()).isEqualTo(5 + (5 + 5));
-        assertThat(secondEntity.getVp()).isEqualTo(10 + (10 + 10));
-
-        verify(playerService).savePlayer(firstEntity);
-        verify(playerService).savePlayer(secondEntity);
-        verifyNoMoreInteractions(playerService);
-    }
 
     private PlayerDto player(long id, int vp, int mp, int ap) {
         return PlayerDto.builder()

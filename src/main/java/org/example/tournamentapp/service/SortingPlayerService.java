@@ -16,7 +16,7 @@ public class SortingPlayerService {
                 .sorted(
                         Comparator.comparingInt(PlayerDto::getTp).reversed()
                                 .thenComparing(Comparator.comparingInt(PlayerDto::getVp).reversed())
-                                .thenComparing(Comparator.comparingInt(PlayerDto::getVpOpp).reversed())
+                                .thenComparing((PlayerDto::getVpOpp))
                                 .thenComparing(Comparator.comparingInt(PlayerDto::getTotalMp).reversed())
                                 .thenComparing(Comparator.comparingInt(PlayerDto::getTotalAp).reversed())
                 )

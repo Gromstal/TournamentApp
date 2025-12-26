@@ -3,7 +3,7 @@ package org.example.tournamentapp.controller;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.example.tournamentapp.model.PairDto;
-import org.example.tournamentapp.model.Tour;
+import org.example.tournamentapp.model.TourContext;
 import org.example.tournamentapp.service.*;
 import org.example.tournamentapp.wrapper.PairsWrapper;
 import org.springframework.stereotype.Controller;
@@ -21,10 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TourController {
 
-    private final PairingService pairingService;
+    private final MergePairingService mergePairingService;
     private final TournamentService tournamentService;
-    private final CalculateService calculateService;
-    private final CreatingPairingService creatingPairingService;
 
     @GetMapping
     public String showTourPage(Model model) {
@@ -33,10 +31,9 @@ public class TourController {
         }
 
         int currentTour = tournamentService.getCurrentTourByTourDate(LocalDate.now());
-        List<PairDto> pairs = pairingService.getPairingList(currentTour);
+        List<PairDto> pairs = mergePairingService.getPairingList(currentTour);
 
-        PairsWrapper wrapper = new PairsWrapper();
-        wrapper.setPairs(pairs);
+        PairsWrapper wrapper = new PairsWrapper(pairs);
 
         model.addAttribute("pairsWrapper", wrapper);
         model.addAttribute("currentTour", currentTour);
@@ -46,18 +43,17 @@ public class TourController {
 
     @PostMapping()
     public String calculateScores(@ModelAttribute PairsWrapper pairsWrapper, Model model, HttpSession session) {
+        TourContext tourContext = tournamentService.processingTournament(pairsWrapper);
 
-        Tour tour = tournamentService.processingTournament(pairsWrapper);
-
-        if (tour.ended()) {
+        if (tourContext.ended()) {
             return "redirect:/finalPage";
         }
 
-        model.addAttribute("pairsWrapper", new PairsWrapper(tour.newPairs()));
-        model.addAttribute("currentTour", tour.updatedTour());
+        model.addAttribute("pairsWrapper", new PairsWrapper(tourContext.newPairs()));
+        model.addAttribute("currentTour", tourContext.updatedTour());
 
-        session.setAttribute("players", tour.players());
-        session.setAttribute("currentTour", tour.updatedTour());
+        session.setAttribute("players", tourContext.players());
+        session.setAttribute("currentTour", tourContext.updatedTour());
 
         return "redirect:/subTotalResult";
     }

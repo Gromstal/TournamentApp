@@ -14,6 +14,7 @@ public class ProxyBotBuilder {
                 .faction("ProxyBot faction")
                 .tp(0)
                 .vp(0)
+                .vpOpp(0)
                 .ap(0)
                 .mp(0)
                 .namesPlayed(new ArrayList<>())
