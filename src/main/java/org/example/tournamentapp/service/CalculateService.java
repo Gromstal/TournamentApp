@@ -2,6 +2,7 @@ package org.example.tournamentapp.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tournamentapp.entity.PlayerEntity;
+import org.example.tournamentapp.model.CalculateContext;
 import org.example.tournamentapp.model.PairDto;
 import org.example.tournamentapp.model.PlayerDto;
 import org.example.tournamentapp.wrapper.PairsWrapper;
@@ -24,9 +25,6 @@ public class CalculateService {
 
     @Transactional
     public void calculate(PlayerDto firstPlayerResult, PlayerDto secondPlayerResult) {
-        PlayerEntity firstPlayer = playerService.getPlayerById(firstPlayerResult.getId());
-        PlayerEntity secondPlayer = playerService.getPlayerById(secondPlayerResult.getId());
-
         int firstPlayerEarnedVP = firstPlayerResult.getAp() + firstPlayerResult.getMp();
         int secondPlayerEarnedVP = secondPlayerResult.getAp() + secondPlayerResult.getMp();
 
@@ -38,22 +36,12 @@ public class CalculateService {
                 secondPlayerResult.getTp(), secondPlayerEarnedVP, firstPlayerEarnedVP, secondPlayerResult.getMp(), secondPlayerResult.getAp(),
                 firstPlayerResult.getMp(), firstPlayerResult.getAp());
 
-
-        firstPlayer.setTp(firstPlayerCalculatedTP);
-        firstPlayer.setVp(firstPlayerResult.getVp() + firstPlayerEarnedVP);
-        firstPlayer.setTotalMp(firstPlayer.getTotalMp() + firstPlayerResult.getMp());
-        firstPlayer.setTotalAp(firstPlayer.getTotalAp() + firstPlayerResult.getAp());
-
-        secondPlayer.setTp(secondPlayerCalculatedTP);
-        secondPlayer.setVp(secondPlayerResult.getVp() + secondPlayerEarnedVP);
-        secondPlayer.setTotalMp(secondPlayer.getTotalMp() + secondPlayerResult.getMp());
-        secondPlayer.setTotalAp(secondPlayer.getTotalAp() + secondPlayerResult.getAp());
-
-        firstPlayer.setVpOpp(firstPlayer.getVpOpp() + secondPlayerResult.getAp() + secondPlayerResult.getMp());
-        secondPlayer.setVpOpp(secondPlayer.getVpOpp() + firstPlayerResult.getAp() + firstPlayerResult.getMp());
-
-        playerService.savePlayer(firstPlayer);
-        playerService.savePlayer(secondPlayer);
+        saveCalculatedPoints (new CalculateContext(firstPlayerResult,
+                secondPlayerResult,
+                firstPlayerEarnedVP,
+                secondPlayerEarnedVP,
+                firstPlayerCalculatedTP,
+                secondPlayerCalculatedTP));
     }
 
     private int calculateTp(int currentTp, int newVp, int otherVp, int mp, int ap, int otherMp, int otherAp) {
@@ -75,5 +63,29 @@ public class CalculateService {
         } else {
             return currentTp;
         }
+    }
+
+    private void saveCalculatedPoints(CalculateContext calculateContext) {
+        PlayerDto firstPlayerResult = calculateContext.firstPlayerResult();
+        PlayerDto secondPlayerResult = calculateContext.secondPlayerResult();
+
+        PlayerEntity firstPlayer = playerService.getPlayerById(firstPlayerResult.getId());
+        PlayerEntity secondPlayer = playerService.getPlayerById(secondPlayerResult.getId());
+
+        firstPlayer.setTp(calculateContext.firstPlayerCalculatedTP());
+        firstPlayer.setVp(firstPlayerResult.getVp() + calculateContext.firstPlayerEarnedVP());
+        firstPlayer.setTotalMp(firstPlayer.getTotalMp() + firstPlayerResult.getMp());
+        firstPlayer.setTotalAp(firstPlayer.getTotalAp() + firstPlayerResult.getAp());
+
+        secondPlayer.setTp(calculateContext.secondPlayerCalculatedTP());
+        secondPlayer.setVp(secondPlayerResult.getVp() + calculateContext.secondPlayerEarnedVP());
+        secondPlayer.setTotalMp(secondPlayer.getTotalMp() + secondPlayerResult.getMp());
+        secondPlayer.setTotalAp(secondPlayer.getTotalAp() + secondPlayerResult.getAp());
+
+        firstPlayer.setVpOpp(firstPlayer.getVpOpp() + secondPlayerResult.getAp() + secondPlayerResult.getMp());
+        secondPlayer.setVpOpp(secondPlayer.getVpOpp() + firstPlayerResult.getAp() + firstPlayerResult.getMp());
+
+        playerService.savePlayer(firstPlayer);
+        playerService.savePlayer(secondPlayer);
     }
 }
