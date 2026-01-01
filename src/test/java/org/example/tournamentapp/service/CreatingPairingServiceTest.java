@@ -42,21 +42,21 @@ class CreatingPairingServiceTest {
         when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
         when(playerService.getPlayers()).thenReturn(entityMap);
 
-        Map<String, Set<String>> playedBefore = snapshotPlayed(players);
+        Map<String, Set<String>> playedBefore = snapshotIsPlayed(players);
 
         List<PairDto> result = service.createTourPairList(players);
 
-        assertEquals(players.size() / 2, result.size(), "Должно быть N/2 пар");
+        assertEquals(players.size() / 2, result.size(), "Кол-во пар должно быть четным");
 
         assertEveryPlayerUsedExactlyOnce(players, result);
         assertNoDuplicatePairsInTour(result);
-        assertNoPairWasPlayedBefore(result, playedBefore);
+        assertNoPairWasIsPlayedBefore(result, playedBefore);
 
         verify(playerService, times(result.size())).saveOpponents(any(PlayerEntity.class), any(PlayerEntity.class));
     }
 
     @Test
-    void noRepeatsWithTourPlayedTest() {
+    void noRepeatsWithTourIsPlayedTest() {
         List<PlayerDto> players = testData.getFinalResultListWithIdsAndEmptyHistory();
         Map<Long, PlayerEntity> entityMap = testData.toEntityMap(players);
 
@@ -65,14 +65,14 @@ class CreatingPairingServiceTest {
         when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
         when(playerService.getPlayers()).thenReturn(entityMap);
 
-        Map<String, Set<String>> playedBefore = snapshotPlayed(players);
+        Map<String, Set<String>> playedBefore = snapshotIsPlayed(players);
 
         List<PairDto> result = service.createTourPairList(players);
 
         assertEquals(players.size() / 2, result.size());
         assertEveryPlayerUsedExactlyOnce(players, result);
         assertNoDuplicatePairsInTour(result);
-        assertNoPairWasPlayedBefore(result, playedBefore);
+        assertNoPairWasIsPlayedBefore(result, playedBefore);
 
         verify(playerService, times(result.size())).saveOpponents(any(PlayerEntity.class), any(PlayerEntity.class));
     }
@@ -85,20 +85,20 @@ class CreatingPairingServiceTest {
         when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
         when(playerService.getPlayers()).thenReturn(entityMap);
 
-        Map<String, Set<String>> playedBefore1 = snapshotPlayed(players);
+        Map<String, Set<String>> playedBefore1 = snapshotIsPlayed(players);
         List<PairDto> round1 = service.createTourPairList(players);
         assertEquals(players.size() / 2, round1.size());
-        assertNoPairWasPlayedBefore(round1, playedBefore1);
+        assertNoPairWasIsPlayedBefore(round1, playedBefore1);
 
-        Map<String, Set<String>> playedBefore2 = snapshotPlayed(players);
+        Map<String, Set<String>> playedBefore2 = snapshotIsPlayed(players);
         List<PairDto> round2 = service.createTourPairList(players);
         assertEquals(players.size() / 2, round2.size());
-        assertNoPairWasPlayedBefore(round2, playedBefore2);
+        assertNoPairWasIsPlayedBefore(round2, playedBefore2);
 
-        Map<String, Set<String>> playedBefore3 = snapshotPlayed(players);
+        Map<String, Set<String>> playedBefore3 = snapshotIsPlayed(players);
         List<PairDto> round3 = service.createTourPairList(players);
         assertEquals(players.size() / 2, round3.size());
-        assertNoPairWasPlayedBefore(round3, playedBefore3);
+        assertNoPairWasIsPlayedBefore(round3, playedBefore3);
 
         Set<String> allPairs = new HashSet<>();
         addPairsToSet(allPairs, round1);
@@ -138,7 +138,7 @@ class CreatingPairingServiceTest {
 
         assertEquals(all.size(), counts.size(), "В туре должны присутствовать все игроки");
         for (PlayerDto p : all) {
-            assertEquals(1L, counts.getOrDefault(p.getName(), 0L), "Игрок должен встретиться ровно 1 раз: " + p.getName());
+            assertEquals(1L, counts.getOrDefault(p.getName(), 0L), "Игрок должен встретиться строго 1 раз: " + p.getName());
         }
     }
 
@@ -152,7 +152,7 @@ class CreatingPairingServiceTest {
         }
     }
 
-    private void assertNoPairWasPlayedBefore(List<PairDto> pairs, Map<String, Set<String>> playedBefore) {
+    private void assertNoPairWasIsPlayedBefore(List<PairDto> pairs, Map<String, Set<String>> playedBefore) {
         for (PairDto p : pairs) {
             String a = p.getFirstPlayer().getName();
             String b = p.getSecondPlayer().getName();
@@ -164,7 +164,7 @@ class CreatingPairingServiceTest {
         }
     }
 
-    private Map<String, Set<String>> snapshotPlayed(List<PlayerDto> players) {
+    private Map<String, Set<String>> snapshotIsPlayed(List<PlayerDto> players) {
         Map<String, Set<String>> snap = new HashMap<>();
         for (PlayerDto p : players) {
             snap.put(p.getName(), new HashSet<>(p.getNamesPlayed()));

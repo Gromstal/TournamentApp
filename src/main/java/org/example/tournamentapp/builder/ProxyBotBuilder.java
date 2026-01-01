@@ -3,7 +3,7 @@ package org.example.tournamentapp.builder;
 import org.example.tournamentapp.model.PlayerDto;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 @Component
 public class ProxyBotBuilder {
@@ -17,7 +17,7 @@ public class ProxyBotBuilder {
                 .vpOpp(0)
                 .ap(0)
                 .mp(0)
-                .namesPlayed(new ArrayList<>())
+                .namesPlayed(new HashSet<>())
                 .build();
     }
 }

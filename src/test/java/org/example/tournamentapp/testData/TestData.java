@@ -4,10 +4,7 @@ import org.example.tournamentapp.entity.PlayerEntity;
 import org.example.tournamentapp.model.PlayerDto;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TestData {
 
@@ -35,7 +32,7 @@ public class TestData {
             p.setId(id++);
             p.setInPair(false);
             if (p.getNamesPlayed() == null) {
-                p.setNamesPlayed(new ArrayList<>());
+                p.setNamesPlayed(new HashSet<>());
             } else {
                 p.getNamesPlayed().clear();
             }

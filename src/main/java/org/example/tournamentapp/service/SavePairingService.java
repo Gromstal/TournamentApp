@@ -22,18 +22,20 @@ public class SavePairingService {
 
 
     public void savePairingList(List<PairDto> pairList, Long tournamentId) {
-        int currentTour = tournamentRepository.getCurrentTourById(tournamentId);
-        List<PairingEntity> pairingEntities = pairingMapper.toEntityList(pairList, currentTour, tournamentRepository.findById(tournamentId).orElse(null));
-        pairingRepository.saveAll(pairingEntities);
+        pairingRepository.saveAll(getCurrentTourPairingList(tournamentId, pairList));
     }
 
     public void saveOpponentsManualSetup(List<PairDto> pairList) {
         Long tournamentId = tournamentRepository.getTournamentIdByTourDate(LocalDate.now());
-        int currentTour = tournamentRepository.getCurrentTourById(tournamentId);
-        List<PairingEntity> pairingEntities = pairingMapper.toEntityList(pairList, currentTour, tournamentRepository.findById(tournamentId).orElse(null));
-        for (PairingEntity pairingEntity : pairingEntities) {
+        for (PairingEntity pairingEntity : getCurrentTourPairingList(tournamentId, pairList)) {
             playerService.saveOpponents(pairingEntity.getFirstPlayer(), pairingEntity.getSecondPlayer());
         }
+    }
+
+    private List<PairingEntity> getCurrentTourPairingList(Long tournamentId, List<PairDto> pairList) {
+        int currentTour = tournamentRepository.getCurrentTourById(tournamentId);
+        return pairingMapper.toEntityList(pairList, currentTour, tournamentRepository.findById(tournamentId).orElse(null));
+
     }
 
 }

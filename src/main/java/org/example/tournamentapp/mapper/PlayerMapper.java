@@ -7,9 +7,7 @@ import org.example.tournamentapp.model.PlayerDto;
 import org.example.tournamentapp.repository.PlayerRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -63,11 +61,12 @@ public class PlayerMapper {
     }
 
     private PlayerDto getPlayer(PlayerEntity playerEntity) {
-        List<String> opponentsName = Optional.ofNullable(playerEntity.getOpponents())
+        Set<String> opponentsName= Optional.ofNullable(playerEntity.getOpponents())
                 .orElse(Collections.emptyList())
                 .stream()
                 .map(PlayerEntity::getName)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+
         return PlayerDto.builder()
                 .id(playerEntity.getId())
                 .name(playerEntity.getName())

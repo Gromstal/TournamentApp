@@ -26,7 +26,27 @@
             </tbody>
         </table>
 
-        <button type="button" class="add-player-btn" style="position: absolute; top: 0; left: 95%;" onclick="addRow() ">Добавить игрока</button>
+        <div style="position: absolute;top: 0;left: 95%;display: flex;flex-direction: column;gap: 8px;align-items: flex-start;">
+            <button type="button"
+                    class="add-player-btn"
+                    onclick="addRow()">
+                Добавить игрока
+            </button>
+
+            <input id="excelFile"
+                   type="file"
+                   name="excelFile"
+                   accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                   hidden>
+
+            <button type="button"
+                    onclick="document.getElementById('excelFile').click()">
+                Добавить из файла
+            </button>
+
+            <span id="excelStatus"
+                  style="font-size: 12px; white-space: nowrap;"></span>
+        </div>
     </div>
 
     <div style="text-align: center; margin-top: 20px;">
@@ -51,62 +71,10 @@
     </tr>
 </template>
 
-<script>
-    function addRow() {
-        const tableBody = document.getElementById('playerTableBody');
-        const template = document.getElementById('rowTemplate');
-        const newRow = document.importNode(template.content, true);
-        tableBody.appendChild(newRow);
-        reindexRows();
-    }
-
-    function removeRow(row) {
-        row.remove();
-        reindexRows();
-    }
-
-    function reindexRows() {
-        const rows = document.querySelectorAll('#playerTableBody .player-row');
-        rows.forEach((row, index) => {
-            const inputs = row.querySelectorAll('input');
-            if (inputs.length === 2) {
-                inputs[0].setAttribute('name', `playerList[${index}].name`);
-                inputs[1].setAttribute('name', `playerList[${index}].faction`);
-            }
-        });
-    }
-
-    document.getElementById('playerForm').addEventListener('submit', function (event) {
-        const nameInputs = document.querySelectorAll('#playerTableBody input[name$=".name"]');
-        const names = [];
-        let hasEmptyName = false;
-        let hasDuplicates = false;
-
-        nameInputs.forEach(input => {
-            const trimmedName = input.value.trim();
-            if (trimmedName === '') {
-                hasEmptyName = true;
-            } else {
-                if (names.includes(trimmedName)) {
-                    hasDuplicates = true;
-                } else {
-                    names.push(trimmedName);
-                }
-            }
-        });
-
-        if (hasEmptyName) {
-            alert('У всех игроков должно быть указано имя!');
-            event.preventDefault();
-            return;
-        }
-
-        if (hasDuplicates) {
-            alert('Имена игроков должны быть уникальными!');
-            event.preventDefault();
-        }
-    });
-</script>
+<script th:src="@{js-scripts/xlsx.full.min.js}"></script>
+<script th:src="@{/js-scripts/addAndDeleteRows.js}"></script>
+<script th:src="@{/js-scripts/copyPasteRows.js}"></script>
+<script th:src="@{/js-scripts/importExcelFile.js}"></script>
 
 </body>
 </html>

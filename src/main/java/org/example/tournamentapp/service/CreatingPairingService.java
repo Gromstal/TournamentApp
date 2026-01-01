@@ -54,99 +54,84 @@ public class CreatingPairingService {
     }
 
     public List<PairDto> createTourPairList(List<PlayerDto> setupList) {
-        List<PlayerDto> playersSorted = sortingPlayerService.getSortedPlayerList(setupList);
+        List<PlayerDto> players = sortingPlayerService.getSortedPlayerList(setupList);
         Map<Long, PlayerEntity> playersById = playerService.getPlayers();
 
-        resetPairs(playersSorted);
+        PairSearchResult best = findBestPairs(players);
 
-        List<PairDto> bestPairs = new ArrayList<>();
-        int[] bestCost = {Integer.MAX_VALUE};
-
-        buildPairs(playersSorted, new ArrayList<>(), 0, bestPairs, bestCost);
-
-        resetPairs(playersSorted);
-
-        if (!bestPairs.isEmpty()) {
-            finalizePairs(bestPairs, playersById);
+        if (!best.pairs.isEmpty()) {
+            finalizePairs(best.pairs, playersById);
         }
-        return bestPairs;
+        return best.pairs;
     }
 
-    private boolean buildPairs(List<PlayerDto> players,
-                               List<PairDto> currentPairs,
-                               int currentCost,
-                               List<PairDto> bestPairs,
-                               int[] bestCost) {
+    private PairSearchResult findBestPairs(List<PlayerDto> players) {
+        /*
+           Алгоритм Backtracking with Branch and Bound
+           Формируем допустимые наборы пар (без повторяющихся пар),
+           накапливая их общую стоимость
+           (стоимость = сумма расстояний между индексами игроков в списке).
 
-        if (currentCost >= bestCost[0]) return false;
+           После получения полного набора пар сравниваем его стоимость
+           с лучшей найденной, сохраняем более дешевый вариант и
+           откатываемся назад, чтобы перебрать альтернативные разбиения
+           и найти минимальную возможную стоимость.
+        */
 
-        int firstFreeIndex = findFirstFreeIndex(players);
-        if (firstFreeIndex == -1) {
-            bestCost[0] = currentCost;
-            bestPairs.clear();
-            bestPairs.addAll(currentPairs);
-            return true;
+        boolean[] used = new boolean[players.size()];
+        List<PairDto> current = new ArrayList<>(players.size() / 2);
+
+        PairSearchResult best = new PairSearchResult(Integer.MAX_VALUE, new ArrayList<>());
+
+        backtrack(players, used, 0, current, best);
+        return best;
+    }
+
+    private void backtrack(List<PlayerDto> players,
+                           boolean[] used,
+                           int currentCost,
+                           List<PairDto> currentPairs,
+                           PairSearchResult best) {
+
+        if (currentCost >= best.cost) return;
+
+        int i = selectNextPlayerIndex(used);
+        if (i == -1) {
+            best.cost = currentCost;
+            best.pairs = new ArrayList<>(currentPairs);
+            return;
         }
 
-        PlayerDto p1 = players.get(firstFreeIndex);
-        p1.setInPair(true);
+        used[i] = true;
+        PlayerDto p1 = players.get(i);
 
-        List<Integer> candidates = findCandidates(players, firstFreeIndex, p1);
-        if (candidates.isEmpty()) {
-            p1.setInPair(false);
-            return false;
-        }
+        for (int j = i + 1; j < players.size(); j++) {
+            if (used[j]) continue;
 
-        boolean foundAny = false;
-
-        for (int j : candidates) {
             PlayerDto p2 = players.get(j);
-            p2.setInPair(true);
+            if (isPlayed(p1, p2)) continue;
 
+            used[j] = true;
             currentPairs.add(new PairDto(p1, p2));
-            int addCost = Math.abs(firstFreeIndex - j);
+            int addCost = j - i;
 
-            boolean branchOk = buildPairs(players, currentPairs, currentCost + addCost, bestPairs, bestCost);
-            foundAny |= branchOk;
-
+            backtrack(players, used, currentCost + addCost, currentPairs, best);
             currentPairs.remove(currentPairs.size() - 1);
-            p2.setInPair(false);
-
-            if (bestCost[0] == (players.size() / 2)) {
-                break;
-            }
+            used[j] = false;
         }
 
-        p1.setInPair(false);
-        return foundAny;
+        used[i] = false;
     }
 
-    private int findFirstFreeIndex(List<PlayerDto> players) {
-        for (int i = 0; i < players.size(); i++) {
-            if (!players.get(i).isInPair()) return i;
+    private int selectNextPlayerIndex(boolean[] used) {
+        for (int i = 0; i < used.length; i++) {
+            if (!used[i]) return i;
         }
         return -1;
     }
 
-    private List<Integer> findCandidates(List<PlayerDto> players, int fromIndex, PlayerDto p1) {
-        List<Integer> candidateIndexes = new ArrayList<>(3);
-
-        for (int j = fromIndex + 1; j < players.size(); j++) {
-            PlayerDto p2 = players.get(j);
-
-            if (p2.isInPair()) continue;
-            if (p1.getNamesPlayed().contains(p2.getName())) continue;
-
-            candidateIndexes.add(j);
-            if (candidateIndexes.size() == 3) break;
-        }
-        return candidateIndexes;
-    }
-
-    private void resetPairs(List<PlayerDto> players) {
-        for (PlayerDto p : players) {
-            p.setInPair(false);
-        }
+    private boolean isPlayed(PlayerDto a, PlayerDto b) {
+        return a.getNamesPlayed().contains(b.getName()) || b.getNamesPlayed().contains(a.getName());
     }
 
     private void finalizePairs(List<PairDto> pairList, Map<Long, PlayerEntity> players) {
@@ -160,6 +145,16 @@ public class CreatingPairingService {
             PlayerEntity entity1 = players.get(p1.getId());
             PlayerEntity entity2 = players.get(p2.getId());
             playerService.saveOpponents(entity1, entity2);
+        }
+    }
+
+    private static final class PairSearchResult {
+        int cost;
+        List<PairDto> pairs;
+
+        PairSearchResult(int cost, List<PairDto> pairs) {
+            this.cost = cost;
+            this.pairs = pairs;
         }
     }
 
