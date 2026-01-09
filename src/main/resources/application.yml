@@ -14,4 +14,13 @@ spring:
       hibernate.order_updates: true
       hibernate.jdbc.batch_versioned_data: true
       hibernate.format_sql: true
-    show-sql: true
+    show-sql: false
+
+logging:
+  level:
+    root: INFO
+    org.example.tournamentapp: DEBUG
+
+pairing:
+  algorithm:
+    timeout-ms: 5000

@@ -47,6 +47,7 @@
 <h2>Ручная настройка пар</h2>
 
 <form th:action="@{/hsetup}" method="post" th:object="${pairsWrapper}">
+  <input type="hidden" name="tournamentId" th:value="${tournamentId}" />
   <table>
     <thead>
     <tr>
@@ -59,22 +60,24 @@
       <tbody class="pair-block">
       <tr>
         <td>
-          <select class="first" th:field="*{pairs[__${pairStat.index}__].firstPlayer.name}">
+          <select class="first" th:field="*{pairs[__${pairStat.index}__].firstPlayer.id}">
             <option value="">-- выберите игрока --</option>
             <option th:each="player : ${playerList}"
-                    th:value="${player.name}"
+                    th:value="${player.id}"
                     th:text="${player.name}">
             </option>
           </select>
+          <div th:errors="*{pairs[__${pairStat.index}__].firstPlayer.id}"></div>
         </td>
         <td>
-          <select class="second" th:field="*{pairs[__${pairStat.index}__].secondPlayer.name}">
+          <select class="second" th:field="*{pairs[__${pairStat.index}__].secondPlayer.id}">
             <option value="">-- выберите игрока --</option>
             <option th:each="player : ${playerList}"
-                    th:value="${player.name}"
+                    th:value="${player.id}"
                     th:text="${player.name}">
             </option>
           </select>
+          <div th:errors="*{pairs[__${pairStat.index}__].secondPlayer.id}"></div>
         </td>
       </tr>
       </tbody>
@@ -102,7 +105,7 @@
             option.disabled = false;
             option.style.display = '';
           } else if (selectedPlayers.has(option.value)) {
-            option.disabled = true;
+            option.disabled = false;
             option.style.display = 'none';
           } else {
             option.disabled = false;

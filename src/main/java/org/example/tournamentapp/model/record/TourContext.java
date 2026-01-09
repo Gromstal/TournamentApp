@@ -1,4 +1,7 @@
-package org.example.tournamentapp.model;
+package org.example.tournamentapp.model.record;
+
+import org.example.tournamentapp.model.PairDto;
+import org.example.tournamentapp.model.PlayerDto;
 
 import java.util.List;
 

@@ -3,12 +3,14 @@ package org.example.tournamentapp.mapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.example.tournamentapp.entity.PairingEntity;
+import org.example.tournamentapp.entity.PlayerEntity;
 import org.example.tournamentapp.entity.Tournament;
 import org.example.tournamentapp.model.PairDto;
-import org.example.tournamentapp.repository.PlayerRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
@@ -17,31 +19,28 @@ import java.util.stream.Collectors;
 public class PairingMapper {
 
     private final PlayerMapper playerMapper;
-    private final PlayerRepository playerRepository;
 
-    public List<PairDto> toDtoList(List<PairingEntity> pairingEntityList) {
+    public List<PairDto> toDtoList(Map<Long, Set<String>> opponentsMap,List<PairingEntity> pairingEntityList) {
         return pairingEntityList.stream()
-                .map(pairingEntityEntity -> {
+                .map(pairingEntity -> {
                     return PairDto.builder()
-                            .firstPlayer(playerMapper.toDto(pairingEntityEntity.getFirstPlayer()))
-                            .secondPlayer(playerMapper.toDto(pairingEntityEntity.getSecondPlayer()))
+                            .firstPlayer(playerMapper.toDto(opponentsMap.get(pairingEntity.getFirstPlayer().getId()),pairingEntity.getFirstPlayer()))
+                            .secondPlayer(playerMapper.toDto(opponentsMap.get(pairingEntity.getSecondPlayer().getId()),pairingEntity.getSecondPlayer()))
                             .build();
                 })
                 .collect(Collectors.toList());
     }
 
-    public PairingEntity toEntity(PairDto pair, int currentTour, Tournament tournament) {
+    public PairingEntity toEntity(PairDto pair,
+                                  PlayerEntity firstPlayer,
+                                  PlayerEntity secondPlayer,
+                                  int currentTour,
+                                  Tournament tournament) {
         PairingEntity pairingEntity = new PairingEntity();
-        pairingEntity.setFirstPlayer(playerMapper.getEntity(pair.getFirstPlayer().getId()));
-        pairingEntity.setSecondPlayer(playerMapper.getEntity(pair.getSecondPlayer().getId()));
+        pairingEntity.setFirstPlayer(firstPlayer);
+        pairingEntity.setSecondPlayer(secondPlayer);
         pairingEntity.setTournament(tournament);
         pairingEntity.setCurrentTour(currentTour);
         return pairingEntity;
-    }
-
-    public List<PairingEntity> toEntityList(List<PairDto> pairList, int currentTour, Tournament tournament) {
-        return pairList.stream()
-                .map(pair -> toEntity(pair, currentTour, tournament))
-                .collect(Collectors.toList());
     }
 }

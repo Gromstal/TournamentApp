@@ -1,10 +1,16 @@
 package org.example.tournamentapp.entity;
 
-import jakarta.persistence.*;
-import lombok.AccessLevel;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Id;
+import jakarta.persistence.GenerationType;
+
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

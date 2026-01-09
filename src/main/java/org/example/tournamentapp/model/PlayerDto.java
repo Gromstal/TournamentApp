@@ -1,5 +1,6 @@
 package org.example.tournamentapp.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlayerDto {
+    @NotNull
     private Long id;
     private String name;
     private String faction;

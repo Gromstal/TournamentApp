@@ -1,23 +1,28 @@
 package org.example.tournamentapp.controller;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.tournamentapp.model.PlayerDto;
-import org.example.tournamentapp.service.*;
+import lombok.extern.slf4j.Slf4j;
+import org.example.tournamentapp.model.record.ManualSetupOption;
+import org.example.tournamentapp.service.SetupService;
+import org.example.tournamentapp.service.TournamentCreatingService;
 import org.example.tournamentapp.wrapper.PlayerListWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
 
 @Controller
 @RequestMapping("/setup")
 @RequiredArgsConstructor
+@Slf4j
 public class TournamentSetupController {
 
     private final SetupService setupService;
-    private final TournamentService tournamentService;
     private final TournamentCreatingService tournamentCreatingService;
 
 
@@ -28,23 +33,17 @@ public class TournamentSetupController {
     }
 
     @PostMapping
-    public String makePairs(HttpSession session,
-                            @ModelAttribute("wrapper") PlayerListWrapper wrapper,
+    public String makePairs(@ModelAttribute("wrapper") PlayerListWrapper wrapper,
                             @RequestParam("tourCount") int tourCount,
-                            @RequestParam(value = "tourFlag", required = false) String tourFlag) {
+                            @RequestParam(value = "tourFlag", defaultValue = "false") boolean manualSetup,
+                            RedirectAttributes redirectAttributes) {
+        log.info("POST /setup. Tournament setup requested. Manual pairing setup: {}",manualSetup);
+        ManualSetupOption manualSetupOption = tournamentCreatingService.create(wrapper.getPlayerList(), tourCount, manualSetup);
 
-        List<PlayerDto> playerDtoList = setupService.setupPlayerListWithProxyBot(wrapper.getPlayerList());
-        Long tournamentId = tournamentCreatingService.createTournament(playerDtoList, tourCount);
-        playerDtoList = tournamentService.getPlayersDTO();
-
-        if (tourFlag != null) {
-            session.setAttribute("players", playerDtoList);
-            return "redirect:/hsetup";
-        }
-
-        tournamentCreatingService.saveStartingPairingList(playerDtoList, tournamentId);
-
-        return "redirect:/nextTour";
+        redirectAttributes.addAttribute("tournamentId", manualSetupOption.tournamentId());
+        return manualSetupOption.isManual()
+                ? "redirect:/hsetup"
+                : "redirect:/nextTour";
     }
 
 }

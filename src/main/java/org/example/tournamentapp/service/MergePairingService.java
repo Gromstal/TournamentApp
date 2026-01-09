@@ -7,10 +7,10 @@ import org.example.tournamentapp.repository.PairingRepository;
 import org.example.tournamentapp.wrapper.PairsWrapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Set;
 import java.util.stream.IntStream;
 
 @Service
@@ -19,10 +19,9 @@ public class MergePairingService {
 
     private final PairingRepository pairingRepository;
     private final PairingMapper pairingMapper;
-    private final PlayerService playerService;
 
-    public List<PairDto> getPairingList(int currentTour) {
-        return pairingMapper.toDtoList(pairingRepository.findByCurrentTour(currentTour));
+    public List<PairDto> getPairingList(Map<Long, Set<String>> opponentsMap,Long tournamentId, int currentTour) {
+        return pairingMapper.toDtoList(opponentsMap,pairingRepository.findByTournament_IdAndCurrentTour(tournamentId,currentTour));
     }
 
     public void mergePairs(List<PairDto> sessionPairs, PairsWrapper pairsWrapper) {
@@ -36,16 +35,4 @@ public class MergePairingService {
             sessionPair.getSecondPlayer().setAp(formPair.getSecondPlayer().getAp());
         });
     }
-
-    public List<PairDto> syncPairs(List<PairDto> pairList) {
-        Map<String, Long> players = playerService.getPlayersIdByName();
-        List<PairDto> syncList = new ArrayList<>();
-        for (PairDto pair : pairList) {
-            pair.getFirstPlayer().setId(players.get(pair.getFirstPlayer().getName()));
-            pair.getSecondPlayer().setId(players.get(pair.getSecondPlayer().getName()));
-            syncList.add(pair);
-        }
-        return syncList;
-    }
-
 }

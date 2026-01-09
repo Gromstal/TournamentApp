@@ -41,6 +41,7 @@
 <h2>Тур № [[${currentTour}]]</h2>
 
 <form th:action="@{/nextTour}" method="post" th:object="${pairsWrapper}">
+    <input type="hidden" name="tournamentId" th:value="${tournamentId}" />
     <table>
         <thead>
         <tr>

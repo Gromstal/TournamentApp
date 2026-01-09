@@ -1,26 +1,34 @@
 package org.example.tournamentapp.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.tournamentapp.entity.PlayerEntity;
+import org.example.tournamentapp.exception.SearchPairAlgorithmTimeOutException;
 import org.example.tournamentapp.model.PairDto;
 import org.example.tournamentapp.model.PlayerDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CreatingPairingService {
 
     private final SortingPlayerService sortingPlayerService;
     private final PlayerService playerService;
 
-    public List<PairDto> createRandomPairList(List<PlayerDto> setupList) {
-        Map<Long, PlayerEntity> players = playerService.getPlayers();
+    @Value("${pairing.algorithm.timeout-ms}")
+    private long pairingTimeoutMs;
+
+    public List<PairDto> createRandomPairList(Long tournamentId, List<PlayerDto> setupList) {
+        Map<Long, PlayerEntity> players = playerService.getPlayers(tournamentId);
         List<PlayerDto> playerDtoList = setupList
                 .stream()
                 .filter(player -> !player.getName().isEmpty())
@@ -37,9 +45,10 @@ public class CreatingPairingService {
 
             PlayerEntity player = players.get(playerDtoList.get(i).getId());
             PlayerEntity opponent = players.get(playerDtoList.get(i + 1).getId());
-            playerService.saveOpponents(player, opponent);
+            playerService.saveOpponents(player.getId(), opponent.getId());
         }
-
+        log.info("Starting pairs creating randomly");
+        log.debug("Created random pair list: {}", pairList);
         return pairList;
     }
 
@@ -50,22 +59,36 @@ public class CreatingPairingService {
         for (int i = 0; i < pairCount; i++) {
             pairs.add(new PairDto(new PlayerDto(), new PlayerDto()));
         }
+        log.info("Starting pairs creating manually");
         return pairs;
     }
 
-    public List<PairDto> createTourPairList(List<PlayerDto> setupList) {
+    public List<PairDto> createTourPairList(Long tournamentId, List<PlayerDto> setupList) {
         List<PlayerDto> players = sortingPlayerService.getSortedPlayerList(setupList);
-        Map<Long, PlayerEntity> playersById = playerService.getPlayers();
+        Map<Long, PlayerEntity> playersById = playerService.getPlayers(tournamentId);
 
-        PairSearchResult best = findBestPairs(players);
-
-        if (!best.pairs.isEmpty()) {
-            finalizePairs(best.pairs, playersById);
+        try {
+            PairSearchResult best = findBestPairs(players, pairingTimeoutMs);
+            if (!best.pairs.isEmpty()) {
+                finalizePairs(best.pairs, playersById);
+            }
+            log.info("Pairs created");
+            log.debug("Best pairs found: {}", best.pairs);
+            return best.pairs;
+        } catch (SearchPairAlgorithmTimeOutException e) {
+            log.warn(
+                    "Pairing algorithm timed out, using fallback strategy (tournamentId={}, timeoutMs={})",
+                    tournamentId,
+                    pairingTimeoutMs
+            );
         }
-        return best.pairs;
+        // return greedyPairs(players);
+
+        //TODO ДОБАВИТЬ FALLBACK алгоритм
+        return null;
     }
 
-    private PairSearchResult findBestPairs(List<PlayerDto> players) {
+    private PairSearchResult findBestPairs(List<PlayerDto> players, long timeOut) {
         /*
            Алгоритм Backtracking with Branch and Bound
            Формируем допустимые наборы пар (без повторяющихся пар),
@@ -77,13 +100,13 @@ public class CreatingPairingService {
            откатываемся назад, чтобы перебрать альтернативные разбиения
            и найти минимальную возможную стоимость.
         */
-
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeOut);
         boolean[] used = new boolean[players.size()];
         List<PairDto> current = new ArrayList<>(players.size() / 2);
 
         PairSearchResult best = new PairSearchResult(Integer.MAX_VALUE, new ArrayList<>());
 
-        backtrack(players, used, 0, current, best);
+        backtrack(players, used, 0, current, best, deadline);
         return best;
     }
 
@@ -91,7 +114,12 @@ public class CreatingPairingService {
                            boolean[] used,
                            int currentCost,
                            List<PairDto> currentPairs,
-                           PairSearchResult best) {
+                           PairSearchResult best,
+                           long deadline) {
+
+        if (System.nanoTime() > deadline) {
+            throw new SearchPairAlgorithmTimeOutException("Pairing searching timed out");
+        }
 
         if (currentCost >= best.cost) return;
 
@@ -115,7 +143,7 @@ public class CreatingPairingService {
             currentPairs.add(new PairDto(p1, p2));
             int addCost = j - i;
 
-            backtrack(players, used, currentCost + addCost, currentPairs, best);
+            backtrack(players, used, currentCost + addCost, currentPairs, best, deadline);
             currentPairs.remove(currentPairs.size() - 1);
             used[j] = false;
         }
@@ -144,7 +172,7 @@ public class CreatingPairingService {
 
             PlayerEntity entity1 = players.get(p1.getId());
             PlayerEntity entity2 = players.get(p2.getId());
-            playerService.saveOpponents(entity1, entity2);
+            playerService.saveOpponents(entity1.getId(), entity2.getId());
         }
     }
 

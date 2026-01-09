@@ -4,41 +4,35 @@ package org.example.tournamentapp.mapper;
 import lombok.Data;
 import org.example.tournamentapp.entity.PlayerEntity;
 import org.example.tournamentapp.model.PlayerDto;
-import org.example.tournamentapp.repository.PlayerRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+
 import java.util.stream.Collectors;
 
 @Data
 @Component
 public class PlayerMapper {
 
-    private final PlayerRepository playerRepository;
-
-    public PlayerDto toDto(PlayerEntity playerEntity) {
-        return getPlayer(playerEntity);
+    public PlayerDto toDto(Set<String> opponents, PlayerEntity playerEntity) {
+        return getPlayer(opponents,playerEntity);
     }
 
-    public List<PlayerDto> toDtoList(List<PlayerEntity> entityList) {
-        return entityList.stream()
-                .map(this::getPlayer)
-                .collect(Collectors.toList());
+    public List<PlayerDto> toDtoList(Map<Long, Set<String>> opponentsMap,List<PlayerEntity> entityList) {
+        return  entityList.stream()
+                .map(player-> toDto(opponentsMap.get(player.getId()),player))
+                .toList();
     }
 
-    public PlayerEntity toEntity(PlayerDto playerDto) {
+    public PlayerEntity getStartingEntity(PlayerDto playerDto) {
         PlayerEntity playerEntity = new PlayerEntity();
 
         playerEntity.setName(playerDto.getName());
         playerEntity.setFaction(playerDto.getFaction());
-
-        List<PlayerEntity> opponentsEntities = playerDto.getNamesPlayed().stream()
-                .map(name -> playerRepository.findByName(name)
-                        .orElseThrow(() -> new RuntimeException("Player not found: " + name)))
-                .collect(Collectors.toList());
-
-        playerEntity.setOpponents(opponentsEntities);
-        playerEntity.setId(playerDto.getId());
+        playerEntity.setOpponents(new HashSet<>());
         playerEntity.setAp(playerDto.getAp());
         playerEntity.setMp(playerDto.getMp());
         playerEntity.setVp(playerDto.getVp());
@@ -50,28 +44,20 @@ public class PlayerMapper {
         return playerEntity;
     }
 
-    public List<PlayerEntity> toEntityList(List<PlayerDto> playerDtos) {
-        return playerDtos.stream()
-                .map(this::toEntity)
+    public List<PlayerEntity> getStartingEntityList(List<PlayerDto> playerDtoList) {
+        return playerDtoList.stream()
+                .map(this::getStartingEntity)
                 .collect(Collectors.toList());
     }
 
-    public PlayerEntity getEntity(Long id) {
-        return playerRepository.findById(id).get();
-    }
-
-    private PlayerDto getPlayer(PlayerEntity playerEntity) {
-        Set<String> opponentsName= Optional.ofNullable(playerEntity.getOpponents())
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(PlayerEntity::getName)
-                .collect(Collectors.toSet());
+    private PlayerDto getPlayer(Set<String> opponentsName,PlayerEntity playerEntity) {
+        Set<String> opponents = (opponentsName == null) ? new HashSet<>() : new HashSet<>(opponentsName);
 
         return PlayerDto.builder()
                 .id(playerEntity.getId())
                 .name(playerEntity.getName())
                 .faction(playerEntity.getFaction())
-                .namesPlayed(opponentsName)
+                .namesPlayed(opponents)
                 .inPair(false)
                 .tp(playerEntity.getTp())
                 .vp(playerEntity.getVp())

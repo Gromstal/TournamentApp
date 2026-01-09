@@ -46,28 +46,27 @@
 
 <h1>Добро пожаловать!</h1>
 
-<!-- Кнопка GET: переход на создание турнира -->
 <div class="block">
     <form th:action="@{/setup}" method="get">
         <button type="submit">Создать турнир</button>
     </form>
 </div>
 
-<!-- Текстовое пояснение -->
 <div class="description">
     ...или, если турнир уже идет и вы хотите продолжить заполнять результаты, то выберите турнир из списка
 </div>
 
-<!-- Форма с выпадающим списком и POST-кнопкой -->
 <div class="block">
     <form th:action="@{/}" method="post">
-        <select id="tournamentSelect" name="selectedDate" required>
-            <option value="" disabled selected>-- выберите дату турнира --</option>
-            <option th:each="date : ${tournaments.dates}"
-                    th:value="${date}"
-                    th:text="${date}">
+        <select name="tournamentId" required>
+            <option value="" disabled selected>-- выберите турнир --</option>
+
+            <option th:each="t : ${tournaments}"
+                    th:value="${t.id}"
+                    th:text="${t.date}">
             </option>
         </select>
+
         <br>
         <button type="submit">Перейти к турниру</button>
     </form>

@@ -1,4 +1,6 @@
-package org.example.tournamentapp.model;
+package org.example.tournamentapp.model.record;
+
+import org.example.tournamentapp.model.PlayerDto;
 
 public record CalculateContext(PlayerDto firstPlayerResult,
                                PlayerDto secondPlayerResult,

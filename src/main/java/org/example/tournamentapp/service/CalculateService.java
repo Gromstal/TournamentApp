@@ -1,8 +1,9 @@
 package org.example.tournamentapp.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.tournamentapp.entity.PlayerEntity;
-import org.example.tournamentapp.model.CalculateContext;
+import org.example.tournamentapp.model.record.CalculateContext;
 import org.example.tournamentapp.model.PairDto;
 import org.example.tournamentapp.model.PlayerDto;
 import org.example.tournamentapp.wrapper.PairsWrapper;
@@ -11,16 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CalculateService {
 
     private final PlayerService playerService;
 
     @Transactional
-    public void calculateFromPairsWrapper(PairsWrapper pairsWrapper) {
+    public void calculateFromPairsWrapper(Long tournamentId, PairsWrapper pairsWrapper) {
         for (PairDto pair : pairsWrapper.getPairs()) {
             calculate(pair.getFirstPlayer(), pair.getSecondPlayer());
         }
-
+        log.info("Tournament {} Points calculated for all players", tournamentId);
     }
 
     @Transactional
@@ -28,15 +30,44 @@ public class CalculateService {
         int firstPlayerEarnedVP = firstPlayerResult.getAp() + firstPlayerResult.getMp();
         int secondPlayerEarnedVP = secondPlayerResult.getAp() + secondPlayerResult.getMp();
 
+        int firstPlayerMp = firstPlayerResult.getMp();
+        int firstPlayerAp = firstPlayerResult.getAp();
+        int secondPlayerMp = secondPlayerResult.getMp();
+        int secondPlayerAp = secondPlayerResult.getAp();
+
+        int firstPlayerCurrentTp = firstPlayerResult.getTp();
         int firstPlayerCalculatedTP = calculateTp(
-                firstPlayerResult.getTp(), firstPlayerEarnedVP, secondPlayerEarnedVP, firstPlayerResult.getMp(), firstPlayerResult.getAp(),
-                secondPlayerResult.getMp(), secondPlayerResult.getAp());
+                firstPlayerCurrentTp, firstPlayerEarnedVP, secondPlayerEarnedVP,
+                firstPlayerMp, firstPlayerAp, secondPlayerMp, secondPlayerAp);
 
+        int secondPlayerCurrentTp = secondPlayerResult.getTp();
         int secondPlayerCalculatedTP = calculateTp(
-                secondPlayerResult.getTp(), secondPlayerEarnedVP, firstPlayerEarnedVP, secondPlayerResult.getMp(), secondPlayerResult.getAp(),
-                firstPlayerResult.getMp(), firstPlayerResult.getAp());
+                secondPlayerCurrentTp, secondPlayerEarnedVP, firstPlayerEarnedVP,
+                secondPlayerMp, secondPlayerAp, firstPlayerMp, firstPlayerAp);
 
-        saveCalculatedPoints (new CalculateContext(firstPlayerResult,
+        log.debug("Calculated points for players: {} {}, {} {}",
+                firstPlayerResult.getId(),
+                firstPlayerResult.getName(),
+                secondPlayerResult.getId(),
+                secondPlayerResult.getName());
+        log.debug("Player {} {}: {} TP, {} VP, {} AP, {} MP",
+                firstPlayerResult.getId(),
+                firstPlayerResult.getName(),
+                firstPlayerCalculatedTP,
+                firstPlayerEarnedVP,
+                firstPlayerResult.getAp(),
+                firstPlayerResult.getMp()
+        );
+        log.debug("Player {} {}: {} TP, {} VP, {} AP, {} MP",
+                secondPlayerResult.getId(),
+                secondPlayerResult.getName(),
+                secondPlayerCalculatedTP,
+                secondPlayerEarnedVP,
+                secondPlayerResult.getAp(),
+                secondPlayerResult.getMp()
+        );
+
+        saveCalculatedPoints(new CalculateContext(firstPlayerResult,
                 secondPlayerResult,
                 firstPlayerEarnedVP,
                 secondPlayerEarnedVP,
@@ -85,6 +116,7 @@ public class CalculateService {
         firstPlayer.setVpOpp(firstPlayer.getVpOpp() + secondPlayerResult.getAp() + secondPlayerResult.getMp());
         secondPlayer.setVpOpp(secondPlayer.getVpOpp() + firstPlayerResult.getAp() + firstPlayerResult.getMp());
 
+        log.debug("Points saved for players {} and {} ", firstPlayer.getId(), secondPlayer.getId());
         playerService.savePlayer(firstPlayer);
         playerService.savePlayer(secondPlayer);
     }

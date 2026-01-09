@@ -64,6 +64,7 @@
 </table>
 
 <form th:action="@{/finalPage}" method="post">
+    <input type="hidden" name="tournamentId" th:value="${tournamentId}" />
     <div style="text-align: center; margin-top: 20px;">
         <button type="submit">Завершить турнир</button>
     </div>

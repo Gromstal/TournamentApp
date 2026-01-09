@@ -29,6 +29,8 @@ class CreatingPairingServiceTest {
 
     private TestData testData;
 
+    private final Long tournamentId = 1L;
+
     @BeforeEach
     void setUp() {
         testData = new TestData();
@@ -40,11 +42,11 @@ class CreatingPairingServiceTest {
         Map<Long, PlayerEntity> entityMap = testData.toEntityMap(players);
 
         when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
-        when(playerService.getPlayers()).thenReturn(entityMap);
+        when(playerService.getPlayers(tournamentId)).thenReturn(entityMap);
 
         Map<String, Set<String>> playedBefore = snapshotIsPlayed(players);
 
-        List<PairDto> result = service.createTourPairList(players);
+        List<PairDto> result = service.createTourPairList(tournamentId,players);
 
         assertEquals(players.size() / 2, result.size(), "Кол-во пар должно быть четным");
 
@@ -52,7 +54,7 @@ class CreatingPairingServiceTest {
         assertNoDuplicatePairsInTour(result);
         assertNoPairWasIsPlayedBefore(result, playedBefore);
 
-        verify(playerService, times(result.size())).saveOpponents(any(PlayerEntity.class), any(PlayerEntity.class));
+        verify(playerService, times(result.size())).saveOpponents(anyLong(), anyLong());
     }
 
     @Test
@@ -63,18 +65,18 @@ class CreatingPairingServiceTest {
         forbidAdjacentPairs(players);
 
         when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
-        when(playerService.getPlayers()).thenReturn(entityMap);
+        when(playerService.getPlayers(tournamentId)).thenReturn(entityMap);
 
         Map<String, Set<String>> playedBefore = snapshotIsPlayed(players);
 
-        List<PairDto> result = service.createTourPairList(players);
+        List<PairDto> result = service.createTourPairList(tournamentId,players);
 
         assertEquals(players.size() / 2, result.size());
         assertEveryPlayerUsedExactlyOnce(players, result);
         assertNoDuplicatePairsInTour(result);
         assertNoPairWasIsPlayedBefore(result, playedBefore);
 
-        verify(playerService, times(result.size())).saveOpponents(any(PlayerEntity.class), any(PlayerEntity.class));
+        verify(playerService, times(result.size())).saveOpponents(anyLong(), anyLong());
     }
 
     @Test
@@ -83,20 +85,20 @@ class CreatingPairingServiceTest {
         Map<Long, PlayerEntity> entityMap = testData.toEntityMap(players);
 
         when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
-        when(playerService.getPlayers()).thenReturn(entityMap);
+        when(playerService.getPlayers(tournamentId)).thenReturn(entityMap);
 
         Map<String, Set<String>> playedBefore1 = snapshotIsPlayed(players);
-        List<PairDto> round1 = service.createTourPairList(players);
+        List<PairDto> round1 = service.createTourPairList(tournamentId,players);
         assertEquals(players.size() / 2, round1.size());
         assertNoPairWasIsPlayedBefore(round1, playedBefore1);
 
         Map<String, Set<String>> playedBefore2 = snapshotIsPlayed(players);
-        List<PairDto> round2 = service.createTourPairList(players);
+        List<PairDto> round2 = service.createTourPairList(tournamentId,players);
         assertEquals(players.size() / 2, round2.size());
         assertNoPairWasIsPlayedBefore(round2, playedBefore2);
 
         Map<String, Set<String>> playedBefore3 = snapshotIsPlayed(players);
-        List<PairDto> round3 = service.createTourPairList(players);
+        List<PairDto> round3 = service.createTourPairList(tournamentId,players);
         assertEquals(players.size() / 2, round3.size());
         assertNoPairWasIsPlayedBefore(round3, playedBefore3);
 
@@ -105,7 +107,7 @@ class CreatingPairingServiceTest {
         assertTrue(addPairsToSet(allPairs, round2), "Есть повтор пары между 1 и 2 туром");
         assertTrue(addPairsToSet(allPairs, round3), "Есть повтор пары между предыдущими турами и 3 туром");
 
-        verify(playerService, times(3 * (players.size() / 2))).saveOpponents(any(PlayerEntity.class), any(PlayerEntity.class));
+        verify(playerService, times(3 * (players.size() / 2))).saveOpponents(anyLong(), anyLong());
     }
 
     @Test
@@ -121,13 +123,13 @@ class CreatingPairingServiceTest {
         }
 
         when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
-        when(playerService.getPlayers()).thenReturn(entityMap);
+        when(playerService.getPlayers(tournamentId)).thenReturn(entityMap);
 
-        List<PairDto> result = service.createTourPairList(players);
+        List<PairDto> result = service.createTourPairList(tournamentId,players);
 
         assertTrue(result.isEmpty(), "Если матчинг невозможен — ожидаем пустой список пар");
 
-        verify(playerService, never()).saveOpponents(any(PlayerEntity.class), any(PlayerEntity.class));
+        verify(playerService, never()).saveOpponents(anyLong(), anyLong());
     }
 
 

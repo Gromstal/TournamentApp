@@ -1,10 +1,22 @@
 package org.example.tournamentapp.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.Id;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.FetchType;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,9 +37,9 @@ public class PlayerEntity {
             joinColumns = @JoinColumn(name = "player_id"),
             inverseJoinColumns = @JoinColumn(name = "opponent_id")
     )
-    private List<PlayerEntity> opponents = new ArrayList<>();
+    private Set<PlayerEntity> opponents = new HashSet<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tournament_id")
     private Tournament tournament;
 
