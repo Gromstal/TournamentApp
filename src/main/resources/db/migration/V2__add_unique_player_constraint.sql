@@ -1,4 +1,4 @@
-ALTER TABLE player_entity
+ALTER TABLE tournament_app.player_entity
     ALTER COLUMN tournament_id SET NOT NULL,
 ALTER COLUMN name SET NOT NULL,
     ALTER COLUMN faction SET NOT NULL;
@@ -10,8 +10,8 @@ BEGIN
         FROM pg_constraint
         WHERE conname = 'uk_players_tournament_name'
     ) THEN
-ALTER TABLE player_entity
+ALTER TABLE tournament_app.player_entity
     ADD CONSTRAINT uk_players_tournament_name
         UNIQUE (tournament_id, name, faction);
 END IF;
-END $$;
+END $$
