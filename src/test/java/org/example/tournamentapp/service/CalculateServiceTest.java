@@ -1,100 +1,169 @@
 package org.example.tournamentapp.service;
 
-import org.example.tournamentapp.model.Player;
-import org.junit.jupiter.api.BeforeEach;
+import org.example.tournamentapp.entity.PlayerEntity;
+import org.example.tournamentapp.model.PlayerDto;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class CalculateServiceTest {
 
+    @InjectMocks
     private CalculateService service;
-
-//    @BeforeEach
-//    void setUp() {
-//        service = new CalculateService();
-//    }
+    @Mock
+    private PlayerService playerService;
 
     @Test
-    void testTp4() {
-        Player first = player(0, 10, 10);
-        Player second = player(0, 5, 5);
+    void tp4_0Test() {
+        PlayerDto firstDto = player(1L, 0, 10, 10);
+        PlayerDto secondDto = player(2L, 0, 5, 5);
 
-        service.calculate(first, second);
+        PlayerEntity firstEntity = entityFromDb(1L, firstDto.getVp(), firstDto.getTp());
+        PlayerEntity secondEntity = entityFromDb(2L, secondDto.getVp(), secondDto.getTp());
 
-        assertThat(first.getTp()).isEqualTo(4);
-        assertThat(second.getTp()).isEqualTo(0);
-        assertTotalsUpdated(first);
-        assertTotalsUpdated(second);
+        when(playerService.getPlayerById(1L)).thenReturn(firstEntity);
+        when(playerService.getPlayerById(2L)).thenReturn(secondEntity);
+
+        service.calculate(firstDto, secondDto);
+
+        assertThat(firstEntity.getTp()).isEqualTo(4);
+        assertThat(secondEntity.getTp()).isEqualTo(0);
+
+        assertThat(firstEntity.getVp()).isEqualTo((20));
+        assertThat(secondEntity.getVp()).isEqualTo((10));
+
+        assertThat(firstEntity.getVpOpp()).isEqualTo(5 + 5);
+        assertThat(secondEntity.getVpOpp()).isEqualTo(10 + 10);
+
+        verify(playerService).savePlayer(firstEntity);
+        verify(playerService).savePlayer(secondEntity);
+        verifyNoMoreInteractions(playerService);
     }
 
     @Test
-    void testTp3_VPGreaterButOneLess() {
-        Player first = player(0, 4, 9);  // VP >,  AP <
-        Player second = player(0, 5, 7);
+    void tp4_0v2Test() {
+        PlayerDto firstDto = player(1L, 0, 1, 2);
+        PlayerDto secondDto = player(2L, 0, 0, 1);
 
-        service.calculate(first, second);
+        PlayerEntity firstEntity = entityFromDb(1L, firstDto.getVp(), firstDto.getTp());
+        PlayerEntity secondEntity = entityFromDb(2L, secondDto.getVp(), secondDto.getTp());
 
-        assertThat(first.getTp()).isEqualTo(3);
-        assertThat(second.getTp()).isEqualTo(1);
-        assertTotalsUpdated(first);
-        assertTotalsUpdated(second);
+        when(playerService.getPlayerById(1L)).thenReturn(firstEntity);
+        when(playerService.getPlayerById(2L)).thenReturn(secondEntity);
+
+        service.calculate(firstDto, secondDto);
+
+        assertThat(firstEntity.getTp()).isEqualTo(4);
+        assertThat(secondEntity.getTp()).isEqualTo(0);
+
+        verify(playerService).savePlayer(firstEntity);
+        verify(playerService).savePlayer(secondEntity);
+        verifyNoMoreInteractions(playerService);
     }
 
     @Test
-    void testTp3_VPGreaterButOneEqual() {
-        Player first = player(0, 5, 9);  // VP >, MP =
-        Player second = player(0, 5, 7);
+    void tp3_1Test() {
+        PlayerDto firstDto = player(1L, 0, 4, 9);
+        PlayerDto secondDto = player(2L, 0, 5, 7);
 
-        service.calculate(first, second);
+        PlayerEntity firstEntity = entityFromDb(1L, firstDto.getVp(), firstDto.getTp());
+        PlayerEntity secondEntity = entityFromDb(2L, secondDto.getVp(), secondDto.getTp());
 
-        assertThat(first.getTp()).isEqualTo(3);
-        assertThat(second.getTp()).isEqualTo(1);
-        assertTotalsUpdated(first);
-        assertTotalsUpdated(second);
+        when(playerService.getPlayerById(1L)).thenReturn(firstEntity);
+        when(playerService.getPlayerById(2L)).thenReturn(secondEntity);
+
+        service.calculate(firstDto, secondDto);
+
+        assertThat(firstEntity.getTp()).isEqualTo(3);
+        assertThat(secondEntity.getTp()).isEqualTo(1);
+
+        assertThat(firstEntity.getVp()).isEqualTo((4 + 9));
+        assertThat(secondEntity.getVp()).isEqualTo((5 + 7));
+
+        assertThat(firstEntity.getVpOpp()).isEqualTo(5 + 7);
+        assertThat(secondEntity.getVpOpp()).isEqualTo(4 + 9);
+
+        verify(playerService).savePlayer(firstEntity);
+        verify(playerService).savePlayer(secondEntity);
+        verifyNoMoreInteractions(playerService);
     }
 
     @Test
-    void testTp2() {
-        Player first = player(0, 5, 5);
-        Player second = player(0, 5, 5);
+    void tp3_1v2Test() {
+        PlayerDto firstDto = player(1L, 0, 5, 9);
+        PlayerDto secondDto = player(2L, 0, 5, 7);
 
-        service.calculate(first, second);
+        PlayerEntity firstEntity = entityFromDb(1L, firstDto.getVp(), firstDto.getTp());
+        PlayerEntity secondEntity = entityFromDb(2L, secondDto.getVp(), secondDto.getTp());
 
-        assertThat(first.getTp()).isEqualTo(2);
-        assertThat(second.getTp()).isEqualTo(2);
-        assertTotalsUpdated(first);
-        assertTotalsUpdated(second);
+        when(playerService.getPlayerById(1L)).thenReturn(firstEntity);
+        when(playerService.getPlayerById(2L)).thenReturn(secondEntity);
+
+        service.calculate(firstDto, secondDto);
+
+        assertThat(firstEntity.getTp()).isEqualTo(3);
+        assertThat(secondEntity.getTp()).isEqualTo(1);
+
+        assertThat(firstEntity.getVp()).isEqualTo((5 + 9));
+        assertThat(secondEntity.getVp()).isEqualTo((5 + 7));
+
+        verify(playerService).savePlayer(firstEntity);
+        verify(playerService).savePlayer(secondEntity);
+        verifyNoMoreInteractions(playerService);
     }
 
     @Test
-    void testTp22() {
-        Player first = player(0, 4, 5);
-        Player second = player(0, 5, 4);
+    void tieTest() {
+        PlayerDto firstDto = player(1L, 0, 5, 5);
+        PlayerDto secondDto = player(2L, 0, 5, 5);
 
-        service.calculate(first, second);
+        PlayerEntity firstEntity = entityFromDb(1L, firstDto.getVp(), firstDto.getTp());
+        PlayerEntity secondEntity = entityFromDb(2L, secondDto.getVp(), secondDto.getTp());
 
-        assertThat(first.getTp()).isEqualTo(2);
-        assertThat(second.getTp()).isEqualTo(2);
-        assertTotalsUpdated(first);
-        assertTotalsUpdated(second);
+        when(playerService.getPlayerById(1L)).thenReturn(firstEntity);
+        when(playerService.getPlayerById(2L)).thenReturn(secondEntity);
+
+        service.calculate(firstDto, secondDto);
+
+        assertThat(firstEntity.getTp()).isEqualTo(2);
+        assertThat(secondEntity.getTp()).isEqualTo(2);
+
+        verify(playerService).savePlayer(firstEntity);
+        verify(playerService).savePlayer(secondEntity);
+        verifyNoMoreInteractions(playerService);
     }
 
     @Test
-    void testTp0() {
-        Player first = player(5, 5, 5);
-        Player second = player(10, 10, 10);
+    void tieV2Test() {
+        PlayerDto firstDto = player(1L, 0, 4, 5);
+        PlayerDto secondDto = player(2L, 0, 5, 4);
 
-        service.calculate(first, second);
+        PlayerEntity firstEntity = entityFromDb(1L, firstDto.getVp(), firstDto.getTp());
+        PlayerEntity secondEntity = entityFromDb(2L, secondDto.getVp(), secondDto.getTp());
 
-        assertThat(first.getTp()).isEqualTo(0);
-        assertThat(second.getTp()).isEqualTo(4);
-        assertTotalsUpdated(first);
-        assertTotalsUpdated(second);
+        when(playerService.getPlayerById(1L)).thenReturn(firstEntity);
+        when(playerService.getPlayerById(2L)).thenReturn(secondEntity);
+
+        service.calculate(firstDto, secondDto);
+
+        assertThat(firstEntity.getTp()).isEqualTo(2);
+        assertThat(secondEntity.getTp()).isEqualTo(2);
+
+        verify(playerService).savePlayer(firstEntity);
+        verify(playerService).savePlayer(secondEntity);
+        verifyNoMoreInteractions(playerService);
     }
 
-    private Player player(int vp, int mp, int ap) {
-        return Player.builder()
+
+    private PlayerDto player(long id, int vp, int mp, int ap) {
+        return PlayerDto.builder()
+                .id(id)
                 .name("TestPlayer")
                 .faction("TestFaction")
                 .vp(vp)
@@ -107,9 +176,14 @@ class CalculateServiceTest {
                 .build();
     }
 
-    private void assertTotalsUpdated(Player player) {
-        assertThat(player.getTotalAp()).isEqualTo(player.getAp());
-        assertThat(player.getTotalMp()).isEqualTo(player.getMp());
+    private PlayerEntity entityFromDb(long id, int vp, int tp) {
+        PlayerEntity e = new PlayerEntity();
+        e.setId(id);
+        e.setVp(vp);
+        e.setTp(tp);
+        e.setTotalAp(0);
+        e.setTotalMp(0);
+        e.setVpOpp(0);
+        return e;
     }
-
 }

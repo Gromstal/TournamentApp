@@ -5,11 +5,15 @@
     <title>Список участников</title>
     <link rel="stylesheet" href="setupPage.css">
 </head>
+<style>
+    .field-error { color: red; font-size: 12px; margin-top: 4px; }
+</style>
 <body>
 
 <h1>Список участников</h1>
 
 <form id="playerForm" th:action="@{/setup}" method="post" th:object="${wrapper}">
+
     <div class="table-with-button" style="position: relative; width: 70%; margin: 0 auto;">
         <table id="playerTable">
             <thead>
@@ -18,15 +22,57 @@
                 <th>Фракция</th>
             </tr>
             </thead>
+
             <tbody id="playerTableBody">
-            <tr class="player-row" ondblclick="removeRow(this)" th:each="player, iterStat : ${wrapper.playerList}">
-                <td><input type="text" th:field="*{playerList[__${iterStat.index}__].name}" maxlength="50"/></td>
-                <td><input type="text" th:field="*{playerList[__${iterStat.index}__].faction}" maxlength="50"/></td>
+            <tr class="player-row"
+                ondblclick="removeRow(this)"
+                th:each="player, iterStat : ${wrapper.playerList}">
+
+                <td>
+                    <input type="text"
+                           th:field="*{playerList[__${iterStat.index}__].name}"
+                           maxlength="35"/>
+
+                    <div class="field-error"
+                         th:errors="*{playerList[__${iterStat.index}__].name}">
+                    </div>
+                </td>
+
+                <td>
+                    <input type="text"
+                           th:field="*{playerList[__${iterStat.index}__].faction}"
+                           maxlength="35"/>
+                </td>
+
             </tr>
             </tbody>
         </table>
 
-        <button type="button" class="add-player-btn" style="position: absolute; top: 0; left: 95%;" onclick="addRow() ">Добавить игрока</button>
+        <div style="position: absolute;top: 0;left: 95%;display: flex;flex-direction: column;gap: 8px;align-items: flex-start;">
+            <button type="button"
+                    class="add-player-btn"
+                    onclick="addRow()">
+                Добавить игрока
+            </button>
+
+            <input id="excelFile"
+                   type="file"
+                   name="excelFile"
+                   accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                   hidden>
+
+            <button type="button"
+                    onclick="document.getElementById('excelFile').click()">
+                Добавить из файла
+            </button>
+
+            <span id="excelStatus"
+                  style="font-size: 12px; white-space: nowrap;"></span>
+        </div>
+    </div>
+    <div class="field-error"
+         style="width: 70%; margin: 6px auto 0;"
+         th:errors="*{playerList}">
     </div>
 
     <div style="text-align: center; margin-top: 20px;">
@@ -43,70 +89,18 @@
     </div>
 </form>
 
-
 <template id="rowTemplate">
     <tr class="player-row" ondblclick="removeRow(this)">
-        <td><input type="text" name="playerList[0].name" maxlength="50"/></td>
-        <td><input type="text" name="playerList[0].faction" maxlength="50"/></td>
+        <td><input type="text" name="playerList[0].name" maxlength="35"/></td>
+        <td><input type="text" name="playerList[0].faction" maxlength="35"/></td>
     </tr>
 </template>
 
-<script>
-    function addRow() {
-        const tableBody = document.getElementById('playerTableBody');
-        const template = document.getElementById('rowTemplate');
-        const newRow = document.importNode(template.content, true);
-        tableBody.appendChild(newRow);
-        reindexRows();
-    }
-
-    function removeRow(row) {
-        row.remove();
-        reindexRows();
-    }
-
-    function reindexRows() {
-        const rows = document.querySelectorAll('#playerTableBody .player-row');
-        rows.forEach((row, index) => {
-            const inputs = row.querySelectorAll('input');
-            if (inputs.length === 2) {
-                inputs[0].setAttribute('name', `playerList[${index}].name`);
-                inputs[1].setAttribute('name', `playerList[${index}].faction`);
-            }
-        });
-    }
-
-    document.getElementById('playerForm').addEventListener('submit', function (event) {
-        const nameInputs = document.querySelectorAll('#playerTableBody input[name$=".name"]');
-        const names = [];
-        let hasEmptyName = false;
-        let hasDuplicates = false;
-
-        nameInputs.forEach(input => {
-            const trimmedName = input.value.trim();
-            if (trimmedName === '') {
-                hasEmptyName = true;
-            } else {
-                if (names.includes(trimmedName)) {
-                    hasDuplicates = true;
-                } else {
-                    names.push(trimmedName);
-                }
-            }
-        });
-
-        if (hasEmptyName) {
-            alert('У всех игроков должно быть указано имя!');
-            event.preventDefault();
-            return;
-        }
-
-        if (hasDuplicates) {
-            alert('Имена игроков должны быть уникальными!');
-            event.preventDefault();
-        }
-    });
-</script>
+<script th:src="@{js-scripts/xlsx.full.min.js}"></script>
+<script th:src="@{/js-scripts/addAndDeleteRows.js}"></script>
+<script th:src="@{/js-scripts/copyPasteRows.js}"></script>
+<script th:src="@{/js-scripts/importExcelFile.js}"></script>
+<script th:src="@{/js-scripts/tourCountValidation.js}"></script>
 
 </body>
 </html>

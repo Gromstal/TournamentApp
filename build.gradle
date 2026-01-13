@@ -23,6 +23,8 @@ repositories {
     mavenCentral()
 }
 
+ext["flyway.version"] = "11.20.1"
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -36,6 +38,10 @@ dependencies {
     implementation "me.paulschwarz:spring-dotenv:4.0.0"
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly  'org.flywaydb:flyway-database-postgresql'
+    testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {

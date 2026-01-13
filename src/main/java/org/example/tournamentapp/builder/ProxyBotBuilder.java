@@ -1,22 +1,23 @@
 package org.example.tournamentapp.builder;
 
-import org.example.tournamentapp.model.Player;
+import org.example.tournamentapp.model.PlayerDto;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 @Component
 public class ProxyBotBuilder {
 
-    public Player getProxyBot() {
-        return Player.builder()
+    public PlayerDto getProxyBot() {
+        return PlayerDto.builder()
                 .name("Proxy Bot")
                 .faction("ProxyBot faction")
                 .tp(0)
                 .vp(0)
+                .vpOpp(0)
                 .ap(0)
                 .mp(0)
-                .namesPlayed(new ArrayList<>())
+                .namesPlayed(new HashSet<>())
                 .build();
     }
 }

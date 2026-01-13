@@ -3,77 +3,61 @@ package org.example.tournamentapp.mapper;
 
 import lombok.Data;
 import org.example.tournamentapp.entity.PlayerEntity;
-import org.example.tournamentapp.model.Player;
-import org.example.tournamentapp.repository.PlayerRepository;
+import org.example.tournamentapp.model.PlayerDto;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+
 import java.util.stream.Collectors;
 
 @Data
 @Component
 public class PlayerMapper {
 
-    private final PlayerRepository playerRepository;
-
-    public Player toDto(PlayerEntity playerEntity) {
-        return getPlayer(playerEntity);
+    public PlayerDto toDto(Set<String> opponents, PlayerEntity playerEntity) {
+        return getPlayer(opponents,playerEntity);
     }
 
-    public List<Player> toDtoList(List<PlayerEntity> entityList) {
-        return entityList.stream()
-                .map(this::getPlayer)
-                .collect(Collectors.toList());
+    public List<PlayerDto> toDtoList(Map<Long, Set<String>> opponentsMap,List<PlayerEntity> entityList) {
+        return  entityList.stream()
+                .map(player-> toDto(opponentsMap.get(player.getId()),player))
+                .toList();
     }
 
-    public PlayerEntity toEntity(Player player) {
+    public PlayerEntity getStartingEntity(PlayerDto playerDto) {
         PlayerEntity playerEntity = new PlayerEntity();
 
-        playerEntity.setName(player.getName());
-        playerEntity.setFaction(player.getFaction());
-
-        List<PlayerEntity> opponentsEntities = player.getNamesPlayed().stream()
-                .map(name -> playerRepository.findByName(name)
-                        .orElseThrow(() -> new RuntimeException("Player not found: " + name)))
-                .collect(Collectors.toList());
-
-        playerEntity.setOpponents(opponentsEntities);
-
-        playerEntity.setId(player.getId());
-        playerEntity.setAp(player.getAp());
-        playerEntity.setMp(player.getMp());
-        playerEntity.setVp(player.getVp());
-        playerEntity.setTp(player.getTp());
-        playerEntity.setTotalAp(player.getTotalAp());
-        playerEntity.setTotalMp(player.getTotalMp());
-        playerEntity.setVpOpp(player.getVpOpp());
+        playerEntity.setName(playerDto.getName());
+        playerEntity.setFaction(playerDto.getFaction());
+        playerEntity.setOpponents(new HashSet<>());
+        playerEntity.setAp(0);
+        playerEntity.setMp(0);
+        playerEntity.setVp(0);
+        playerEntity.setTp(0);
+        playerEntity.setTotalAp(0);
+        playerEntity.setTotalMp(0);
+        playerEntity.setVpOpp(0);
 
         return playerEntity;
     }
 
-    public List<PlayerEntity> toEntityList(List<Player> players) {
-        return players.stream()
-                .map(this::toEntity)
+    public List<PlayerEntity> getStartingEntityList(List<PlayerDto> playerDtoList) {
+        return playerDtoList.stream()
+                .map(this::getStartingEntity)
                 .collect(Collectors.toList());
     }
 
-    public PlayerEntity getEntity(Long id) {
-        return playerRepository.findById(id).get();
-    }
+    private PlayerDto getPlayer(Set<String> opponentsName,PlayerEntity playerEntity) {
+        Set<String> opponents = (opponentsName == null) ? new HashSet<>() : new HashSet<>(opponentsName);
 
-    private Player getPlayer(PlayerEntity playerEntity) {
-        List<String> opponentsName = Optional.ofNullable(playerEntity.getOpponents())
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(PlayerEntity::getName)
-                .collect(Collectors.toList());
-        return Player.builder()
+        return PlayerDto.builder()
                 .id(playerEntity.getId())
                 .name(playerEntity.getName())
                 .faction(playerEntity.getFaction())
-                .namesPlayed(opponentsName)
+                .namesPlayed(opponents)
                 .inPair(false)
                 .tp(playerEntity.getTp())
                 .vp(playerEntity.getVp())

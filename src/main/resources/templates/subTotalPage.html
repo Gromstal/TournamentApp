@@ -61,6 +61,7 @@
     </tbody>
 </table>
 <form th:action="@{/nextTour}" method="get">
+    <input type="hidden" name="tournamentId" th:value="${tournamentId}" />
     <div style="text-align: center; margin-top: 20px;">
         <button type="submit">К следующему туру</button>
     </div>

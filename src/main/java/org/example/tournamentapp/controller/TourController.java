@@ -1,80 +1,78 @@
 package org.example.tournamentapp.controller;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.tournamentapp.model.Pair;
-import org.example.tournamentapp.model.Player;
-import org.example.tournamentapp.service.PairingService;
-import org.example.tournamentapp.service.SetupService;
-import org.example.tournamentapp.service.TourService;
-import org.example.tournamentapp.service.TournamentService;
+import lombok.extern.slf4j.Slf4j;
+import org.example.tournamentapp.model.record.ProcessingOption;
+import org.example.tournamentapp.model.record.TourContext;
+import org.example.tournamentapp.service.TournamentFinishingService;
+import org.example.tournamentapp.service.TournamentDataService;
+import org.example.tournamentapp.service.TournamentProcessingService;
+import org.example.tournamentapp.validation.ScoreGroup;
 import org.example.tournamentapp.wrapper.PairsWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.util.List;
 
 @Controller
 @RequestMapping("/nextTour")
 @RequiredArgsConstructor
+@Slf4j
 public class TourController {
 
-    private final TourService tourService;
-    private final SetupService setupService;
-    private final PairingService pairingService;
-    private final TournamentService tournamentService;
+    private final TournamentProcessingService tournamentProcessingService;
+    private final TournamentFinishingService tournamentFinishingService;
+    private final TournamentDataService tournamentDataService;
 
     @GetMapping
-    public String showTourPage(Model model) {
-        if (tournamentService.isEnded()) {
+    public String showTourPage(Model model,
+                               @RequestParam Long tournamentId,
+                               RedirectAttributes redirectAttributes) {
+        if (tournamentFinishingService.isEnded(tournamentId)) {
+            redirectAttributes.addAttribute("tournamentId", tournamentId);
             return "redirect:/finalPage";
         }
 
-        int currentTour = tournamentService.getCurrentTourByTourDate(LocalDate.now());
-        List<Pair> pairs = pairingService.getPairsFromDB(currentTour);
+        ProcessingOption processingOption = tournamentProcessingService.getProcessingOption(tournamentId);
 
-        PairsWrapper wrapper = new PairsWrapper();
-        wrapper.setPairs(pairs);
-
-        model.addAttribute("pairsWrapper", wrapper);
-        model.addAttribute("currentTour", currentTour);
+        model.addAttribute("pairsWrapper", processingOption.wrapper());
+        model.addAttribute("currentTour", processingOption.currentTour());
+        model.addAttribute("tournamentId", tournamentId);
 
         return "nextTourPage";
     }
 
     @PostMapping()
-    public String calculateScores(@ModelAttribute PairsWrapper pairsWrapper, Model model, HttpSession session) {
+    public String calculateScores(@Validated(ScoreGroup.class) @ModelAttribute("pairsWrapper") PairsWrapper pairsWrapper,
+                                  BindingResult bindingResult,
+                                  Model model,
+                                  @RequestParam Long tournamentId,
+                                  RedirectAttributes redirectAttributes) {
+        log.info("POST /nextTour. Calculate score requested for Tournament {}", tournamentId);
 
-        int currentTour = tournamentService.getCurrentTourByTourDate(LocalDate.now());
-        int total = tournamentService.getTourCountByTourDate(LocalDate.now());
-        List<Pair> pairs = pairingService.getPairsFromDB(currentTour);
-        Long tournamentId = tournamentService.getTournamentIdByTourDate(LocalDate.now());
+        if (bindingResult.hasErrors()) {
+            int currentTour = tournamentDataService.getCurrentTourByTournamentId(tournamentId);
+            model.addAttribute("pairsWrapper", pairsWrapper);
+            model.addAttribute("currentTour", currentTour);
+            model.addAttribute("tournamentId", tournamentId);
+            return "nextTourPage";
+        }
 
-        tourService.mergePairs(pairs, pairsWrapper);
-        tourService.calculateTourPoints(new PairsWrapper(pairs));
+        TourContext tourContext = tournamentProcessingService.processingTournament(tournamentId, pairsWrapper);
 
-        if (currentTour == total) {
-            tournamentService.saveIsEnded();
+        if (tourContext.ended()) {
+            redirectAttributes.addAttribute("tournamentId", tournamentId);
             return "redirect:/finalPage";
         }
 
-        List<Pair> newPairs = setupService.createTourPairList(tournamentService.getPlayersDTO());
-
-        int newTour = tournamentService.updateCurrentTour(tournamentId);
-        pairingService.savePairingList(newPairs, tournamentId);
-
-        model.addAttribute("pairsWrapper", new PairsWrapper(newPairs));
-        model.addAttribute("currentTour", newTour);
-
-        List<Player> players = tournamentService.getPlayersDTO();
-        session.setAttribute("players", players);
-        session.setAttribute("currentTour", newTour);
-
+        redirectAttributes.addAttribute("tournamentId", tournamentId);
         return "redirect:/subTotalResult";
     }
 }
