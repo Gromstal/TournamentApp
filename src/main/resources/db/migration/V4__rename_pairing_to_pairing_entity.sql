@@ -1,0 +1,1 @@
+ALTER TABLE tournament_app.pairing RENAME TO pairing_entity;
