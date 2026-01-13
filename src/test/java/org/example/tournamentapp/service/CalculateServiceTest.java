@@ -16,7 +16,6 @@ class CalculateServiceTest {
 
     @InjectMocks
     private CalculateService service;
-
     @Mock
     private PlayerService playerService;
 

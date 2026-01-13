@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tournamentapp.entity.PlayerEntity;
 import org.example.tournamentapp.exception.PlayerNotFoundException;
+import org.example.tournamentapp.mapper.PlayerMapper;
 import org.example.tournamentapp.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,12 +34,13 @@ public class PlayerService {
     }
 
     public PlayerEntity getPlayerById(Long id) {
-        return playerRepository.findById(id).orElseThrow(()-> new PlayerNotFoundException("Player not found with id: " + id));
+        return playerRepository.findById(id).orElseThrow(()-> new PlayerNotFoundException("Player not found"));
     }
 
     public Map<Long,PlayerEntity> getPlayers(Long tournamentId){
         List<PlayerEntity> players = playerRepository.findAllByTournamentId(tournamentId);
-        return players.stream().collect(Collectors.toMap(PlayerEntity::getId, p -> p));
+        return players.stream()
+                .collect(Collectors.toMap( PlayerEntity::getId, player -> player, (existing, replacement) -> { log.warn( "Duplicate player id {} Tournament {}", existing.getId(), tournamentId ); return replacement; } ));
     }
 
     public PlayerEntity getEntityReference(Long id) {

@@ -30,9 +30,12 @@ public class TournamentCreatingService {
 
     @Transactional
     public ManualSetupOption create(List<PlayerDto> playerDtoList, int tourCount, boolean manualSetup) {
+        if (playerDtoList == null || playerDtoList.size() < 2) {
+            throw new IllegalArgumentException("Need at least 2 players");
+        }
         List<PlayerDto> players = setupService.setupPlayerListWithProxyBot(playerDtoList);
         Tournament newTournament = tournamentBuilder.getNewTournament(
-                playerMapper.getStartingEntityList(players),
+                new HashSet<>(playerMapper.getStartingEntityList(players)),
                 tourCount);
         newTournament.getPlayers().forEach(playerEntity -> playerEntity.setTournament(newTournament));
         Tournament savedTournament = tournamentRepository.save(newTournament);

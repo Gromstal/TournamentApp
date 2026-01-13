@@ -1,0 +1,7 @@
+logging:
+  level:
+    root: INFO
+    org.example.tournamentapp: DEBUG
+
+tournament:
+  needToDelete: ${NEED_TO_DELETE}

@@ -113,3 +113,11 @@ button:hover {
     background-color: #5e8e88;
     transform: scale(1.05);
 }
+
+.field-error {
+    color: #c62828;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 8px;
+}

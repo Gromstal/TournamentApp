@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CreatingPairingService {
 
+    private final CreateFallbackPairingService createFallbackPairingService;
     private final SortingPlayerService sortingPlayerService;
     private final PlayerService playerService;
 
@@ -82,10 +83,13 @@ public class CreatingPairingService {
                     pairingTimeoutMs
             );
         }
-        // return greedyPairs(players);
 
-        //TODO ДОБАВИТЬ FALLBACK алгоритм
-        return null;
+        List<PairDto> fallbackPairs = createFallbackPairingService.getFastFallbackPairing(setupList);
+        finalizePairs(fallbackPairs, playersById);
+        log.info("Fallback pairs created");
+        log.debug("Fallback pairs found: {}", fallbackPairs);
+
+        return fallbackPairs;
     }
 
     private PairSearchResult findBestPairs(List<PlayerDto> players, long timeOut) {
@@ -101,17 +105,17 @@ public class CreatingPairingService {
            и найти минимальную возможную стоимость.
         */
         long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeOut);
-        boolean[] used = new boolean[players.size()];
+        boolean[] played = new boolean[players.size()];
         List<PairDto> current = new ArrayList<>(players.size() / 2);
 
         PairSearchResult best = new PairSearchResult(Integer.MAX_VALUE, new ArrayList<>());
 
-        backtrack(players, used, 0, current, best, deadline);
+        backtrack(players, played, 0, current, best, deadline);
         return best;
     }
 
     private void backtrack(List<PlayerDto> players,
-                           boolean[] used,
+                           boolean[] played,
                            int currentCost,
                            List<PairDto> currentPairs,
                            PairSearchResult best,
@@ -123,37 +127,37 @@ public class CreatingPairingService {
 
         if (currentCost >= best.cost) return;
 
-        int i = selectNextPlayerIndex(used);
+        int i = selectNextPlayerIndex(played);
         if (i == -1) {
             best.cost = currentCost;
             best.pairs = new ArrayList<>(currentPairs);
             return;
         }
 
-        used[i] = true;
+        played[i] = true;
         PlayerDto p1 = players.get(i);
 
         for (int j = i + 1; j < players.size(); j++) {
-            if (used[j]) continue;
+            if (played[j]) continue;
 
             PlayerDto p2 = players.get(j);
             if (isPlayed(p1, p2)) continue;
 
-            used[j] = true;
+            played[j] = true;
             currentPairs.add(new PairDto(p1, p2));
             int addCost = j - i;
 
-            backtrack(players, used, currentCost + addCost, currentPairs, best, deadline);
+            backtrack(players, played, currentCost + addCost, currentPairs, best, deadline);
             currentPairs.remove(currentPairs.size() - 1);
-            used[j] = false;
+            played[j] = false;
         }
 
-        used[i] = false;
+        played[i] = false;
     }
 
-    private int selectNextPlayerIndex(boolean[] used) {
-        for (int i = 0; i < used.length; i++) {
-            if (!used[i]) return i;
+    private int selectNextPlayerIndex(boolean[] played) {
+        for (int i = 0; i < played.length; i++) {
+            if (!played[i]) return i;
         }
         return -1;
     }

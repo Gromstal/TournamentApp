@@ -67,7 +67,9 @@
                     th:text="${player.name}">
             </option>
           </select>
-          <div th:errors="*{pairs[__${pairStat.index}__].firstPlayer.id}"></div>
+          <div class="field-error"
+               th:errors="*{pairs[__${pairStat.index}__].firstPlayer.id}">
+          </div>
         </td>
         <td>
           <select class="second" th:field="*{pairs[__${pairStat.index}__].secondPlayer.id}">
@@ -77,7 +79,9 @@
                     th:text="${player.name}">
             </option>
           </select>
-          <div th:errors="*{pairs[__${pairStat.index}__].secondPlayer.id}"></div>
+          <div class="field-error"
+               th:errors="*{pairs[__${pairStat.index}__].secondPlayer.id}">
+          </div>
         </td>
       </tr>
       </tbody>

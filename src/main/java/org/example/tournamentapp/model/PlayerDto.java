@@ -1,10 +1,17 @@
 package org.example.tournamentapp.model;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.tournamentapp.validation.CreateGroup;
+import org.example.tournamentapp.validation.ScoreGroup;
+import org.example.tournamentapp.validation.SelectGroup;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,16 +21,27 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlayerDto {
-    @NotNull
+    @NotNull(groups = SelectGroup.class, message = "Выберите игрока")
     private Long id;
+
+    @NotBlank(groups= CreateGroup.class,message = "У игрока должно быть имя")
+    @Size(groups= CreateGroup.class,min = 2, max = 35, message = "Имя должно содержать от 2 до 35 символов")
     private String name;
     private String faction;
 
     @Builder.Default
     private Set<String> namesPlayed=new HashSet<>();
 
-    private int ap;
-    private int mp;
+    @NotNull(groups = ScoreGroup.class, message = "Введите AP")
+    @Min(value = 0, groups = ScoreGroup.class, message = "AP не может быть меньше 0")
+    @Max(value = 999, groups = ScoreGroup.class, message = "AP слишком большой")
+    private Integer  ap;
+
+    @NotNull(groups = ScoreGroup.class, message = "Введите MP")
+    @Min(value = 0, groups = ScoreGroup.class, message = "MP не может быть меньше 0")
+    @Max(value = 999, groups = ScoreGroup.class, message = "MP слишком большой")
+    private Integer  mp;
+
     private int vp;
     private int tp;
 

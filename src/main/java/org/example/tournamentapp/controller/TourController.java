@@ -2,18 +2,24 @@ package org.example.tournamentapp.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.tournamentapp.model.PairDto;
+import org.example.tournamentapp.model.record.ProcessingOption;
 import org.example.tournamentapp.model.record.TourContext;
-import org.example.tournamentapp.service.*;
+import org.example.tournamentapp.service.TournamentFinishingService;
+import org.example.tournamentapp.service.TournamentDataService;
+import org.example.tournamentapp.service.TournamentProcessingService;
+import org.example.tournamentapp.validation.ScoreGroup;
 import org.example.tournamentapp.wrapper.PairsWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Controller
 @RequestMapping("/nextTour")
@@ -21,11 +27,9 @@ import java.util.Set;
 @Slf4j
 public class TourController {
 
-    private final MergePairingService mergePairingService;
     private final TournamentProcessingService tournamentProcessingService;
     private final TournamentFinishingService tournamentFinishingService;
     private final TournamentDataService tournamentDataService;
-    private final TournamentOpponentHistoryService tournamentOpponentHistoryService;
 
     @GetMapping
     public String showTourPage(Model model,
@@ -36,34 +40,37 @@ public class TourController {
             return "redirect:/finalPage";
         }
 
-        int currentTour = tournamentDataService.getCurrentTourByTourId(tournamentId);
-        Map<Long, Set<String>> opponentsMap =  tournamentOpponentHistoryService.getOpponentsMap(tournamentId);
-        List<PairDto> pairs = mergePairingService.getPairingList(opponentsMap,tournamentId,currentTour);
+        ProcessingOption processingOption = tournamentProcessingService.getProcessingOption(tournamentId);
 
-        PairsWrapper wrapper = new PairsWrapper(pairs);
-
-        model.addAttribute("pairsWrapper", wrapper);
-        model.addAttribute("currentTour", currentTour);
+        model.addAttribute("pairsWrapper", processingOption.wrapper());
+        model.addAttribute("currentTour", processingOption.currentTour());
         model.addAttribute("tournamentId", tournamentId);
 
         return "nextTourPage";
     }
 
     @PostMapping()
-    public String calculateScores(@ModelAttribute PairsWrapper pairsWrapper,
+    public String calculateScores(@Validated(ScoreGroup.class) @ModelAttribute("pairsWrapper") PairsWrapper pairsWrapper,
+                                  BindingResult bindingResult,
                                   Model model,
                                   @RequestParam Long tournamentId,
                                   RedirectAttributes redirectAttributes) {
         log.info("POST /nextTour. Calculate score requested for Tournament {}", tournamentId);
+
+        if (bindingResult.hasErrors()) {
+            int currentTour = tournamentDataService.getCurrentTourByTournamentId(tournamentId);
+            model.addAttribute("pairsWrapper", pairsWrapper);
+            model.addAttribute("currentTour", currentTour);
+            model.addAttribute("tournamentId", tournamentId);
+            return "nextTourPage";
+        }
+
         TourContext tourContext = tournamentProcessingService.processingTournament(tournamentId, pairsWrapper);
 
         if (tourContext.ended()) {
             redirectAttributes.addAttribute("tournamentId", tournamentId);
             return "redirect:/finalPage";
         }
-
-        model.addAttribute("pairsWrapper", new PairsWrapper(tourContext.newPairs()));
-        model.addAttribute("currentTour", tourContext.updatedTour());
 
         redirectAttributes.addAttribute("tournamentId", tournamentId);
         return "redirect:/subTotalResult";

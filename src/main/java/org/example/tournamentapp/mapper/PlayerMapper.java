@@ -33,13 +33,13 @@ public class PlayerMapper {
         playerEntity.setName(playerDto.getName());
         playerEntity.setFaction(playerDto.getFaction());
         playerEntity.setOpponents(new HashSet<>());
-        playerEntity.setAp(playerDto.getAp());
-        playerEntity.setMp(playerDto.getMp());
-        playerEntity.setVp(playerDto.getVp());
-        playerEntity.setTp(playerDto.getTp());
-        playerEntity.setTotalAp(playerDto.getTotalAp());
-        playerEntity.setTotalMp(playerDto.getTotalMp());
-        playerEntity.setVpOpp(playerDto.getVpOpp());
+        playerEntity.setAp(0);
+        playerEntity.setMp(0);
+        playerEntity.setVp(0);
+        playerEntity.setTp(0);
+        playerEntity.setTotalAp(0);
+        playerEntity.setTotalMp(0);
+        playerEntity.setVpOpp(0);
 
         return playerEntity;
     }

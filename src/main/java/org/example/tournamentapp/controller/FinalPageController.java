@@ -7,6 +7,7 @@ import org.example.tournamentapp.service.SortingPlayerService;
 import org.example.tournamentapp.service.TournamentDataService;
 import org.example.tournamentapp.service.TournamentFinishingService;
 import org.example.tournamentapp.wrapper.PlayerListWrapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,8 @@ public class FinalPageController {
     private final SortingPlayerService sortingPlayerService;
     private final TournamentFinishingService tournamentFinishingService;
     private final TournamentDataService tournamentDataService;
+    @Value("${tournament.needToDelete}")
+    private boolean needToDelete;
 
     @GetMapping
     public String finalPage(Model model,
@@ -39,8 +42,12 @@ public class FinalPageController {
     @PostMapping
     public String finalPageSubmit(@RequestParam Long tournamentId) {
         log.info("POST /finalPage. Finish/Delete tournament requested for Tournament {}, redirecting to starting page", tournamentId);
-        tournamentFinishingService.deleteTournament(tournamentId);
+        log.info("Config needToDelete: {} ", needToDelete);
+        if (needToDelete) tournamentFinishingService.deleteTournament(tournamentId);
 
         return "redirect:/";
     }
 }
+
+
+//${SPRING_PROFILES_ACTIVE}

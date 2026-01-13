@@ -4,13 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tournamentapp.model.PairDto;
 import org.example.tournamentapp.model.PlayerDto;
+import org.example.tournamentapp.model.record.ProcessingOption;
 import org.example.tournamentapp.model.record.TourContext;
 import org.example.tournamentapp.model.record.TournamentContext;
 import org.example.tournamentapp.wrapper.PairsWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +31,6 @@ public class TournamentProcessingService {
 
     @Transactional
     public TourContext processingTournament(Long tournamentId, PairsWrapper pairsWrapper) {
-
         TournamentContext tournamentContext = tournamentDataService.getTournamentContext(tournamentId);
         List<PairDto> pairs = mergePairingService.getPairingList(tournamentOpponentHistoryService.getOpponentsMap(tournamentId),tournamentId,tournamentContext.currentTour());
 
@@ -48,6 +50,16 @@ public class TournamentProcessingService {
         log.info("New pairs for {} tour (Tournament {}) creating and saved successfully", updatedTour, tournamentId);
         log.debug("New pairs: {}", newPairs);
         return new TourContext(false, updatedTour, newPairs, players);
+    }
+
+    public ProcessingOption getProcessingOption (Long tournamentId) {
+        int currentTour = tournamentDataService.getCurrentTourByTournamentId(tournamentId);
+        Map<Long, Set<String>> opponentsMap =  tournamentOpponentHistoryService.getOpponentsMap(tournamentId);
+        List<PairDto> pairs = mergePairingService.getPairingList(opponentsMap,tournamentId,currentTour);
+
+        PairsWrapper wrapper = new PairsWrapper(pairs);
+
+        return new ProcessingOption(currentTour,wrapper);
     }
     
 }

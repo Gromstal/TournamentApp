@@ -15,9 +15,9 @@ import java.util.ArrayList;
 public class SetupService {
 
     private final ProxyBotService proxyBotService;
-    private final PlayerListWrapper playerListWrapper;
 
     public PlayerListWrapper setupPlayerList() {
+        PlayerListWrapper playerListWrapper = new PlayerListWrapper();
         playerListWrapper.setPlayerList(new ArrayList<>());
         return playerListWrapper;
     }

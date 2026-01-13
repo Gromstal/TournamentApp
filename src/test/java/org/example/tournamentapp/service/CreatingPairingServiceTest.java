@@ -23,17 +23,28 @@ class CreatingPairingServiceTest {
     @Mock SortingPlayerService sortingPlayerService;
     @Mock
     PlayerService playerService;
-
+    @Mock
+    CreateFallbackPairingService createFallbackPairingService;
     @InjectMocks
     CreatingPairingService service;
 
     private TestData testData;
-
     private final Long tournamentId = 1L;
 
     @BeforeEach
     void setUp() {
         testData = new TestData();
+        setPairingTimeout(service, "pairingTimeoutMs", 5000L);
+    }
+
+    private void setPairingTimeout(Object target, String fieldName, Object value) {
+        try {
+            var field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set field: " + fieldName, e);
+        }
     }
 
     @Test
@@ -129,6 +140,76 @@ class CreatingPairingServiceTest {
 
         assertTrue(result.isEmpty(), "Если матчинг невозможен — ожидаем пустой список пар");
 
+        verify(playerService, never()).saveOpponents(anyLong(), anyLong());
+    }
+
+    @Test
+    void timeoutAndFallbackTest() {
+        setPairingTimeout(service, "pairingTimeoutMs", 0L);
+
+        List<PlayerDto> players = testData.getFinalResultListWithIdsAndEmptyHistory();
+        Map<Long, PlayerEntity> entityMap = testData.toEntityMap(players);
+
+        List<PairDto> fallbackPairs = new ArrayList<>();
+        for (int i = 0; i < players.size() - 1; i += 2) {
+            fallbackPairs.add(new PairDto(players.get(i), players.get(i + 1)));
+        }
+
+        when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
+        when(playerService.getPlayers(tournamentId)).thenReturn(entityMap);
+        when(createFallbackPairingService.getFastFallbackPairing(anyList())).thenReturn(fallbackPairs);
+
+        List<PairDto> result = service.createTourPairList(tournamentId, players);
+
+        assertNotNull(result, "Result should not be null");
+        assertEquals(fallbackPairs.size(), result.size(), "Should return fallback pairs");
+        verify(createFallbackPairingService, times(1)).getFastFallbackPairing(anyList());
+        verify(playerService, times(result.size())).saveOpponents(anyLong(), anyLong());
+    }
+
+    @Test
+    void fallbackPairsFinalizedTest() {
+        setPairingTimeout(service, "pairingTimeoutMs", 0L);
+
+        List<PlayerDto> players = testData.getFinalResultListWithIdsAndEmptyHistory();
+        Map<Long, PlayerEntity> entityMap = testData.toEntityMap(players);
+
+        List<PairDto> fallbackPairs = new ArrayList<>();
+        PlayerDto p1 = players.get(0);
+        PlayerDto p2 = players.get(1);
+        fallbackPairs.add(new PairDto(p1, p2));
+
+        when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
+        when(playerService.getPlayers(tournamentId)).thenReturn(entityMap);
+        when(createFallbackPairingService.getFastFallbackPairing(anyList())).thenReturn(fallbackPairs);
+
+        List<PairDto> result = service.createTourPairList(tournamentId, players);
+
+        assertEquals(1, result.size());
+        verify(playerService, times(1)).saveOpponents(p1.getId(), p2.getId());
+
+        assertTrue(p1.getNamesPlayed().contains(p2.getName()), 
+                   "У 1 игрока должен быть в списке оппонентов игрок 2");
+        assertTrue(p2.getNamesPlayed().contains(p1.getName()), 
+                   "У 2 игрока должен быть в списке оппонентов игрок 1");
+    }
+
+    @Test
+    void emptyFallbackResultTest() {
+        setPairingTimeout(service, "pairingTimeoutMs", 0L);
+
+        List<PlayerDto> players = testData.getFinalResultListWithIdsAndEmptyHistory();
+        Map<Long, PlayerEntity> entityMap = testData.toEntityMap(players);
+
+        when(sortingPlayerService.getSortedPlayerList(anyList())).thenReturn(players);
+        when(playerService.getPlayers(tournamentId)).thenReturn(entityMap);
+        when(createFallbackPairingService.getFastFallbackPairing(anyList()))
+                .thenReturn(new ArrayList<>());
+
+        List<PairDto> result = service.createTourPairList(tournamentId, players);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty(), "Empty fallback result should be returned safely");
         verify(playerService, never()).saveOpponents(anyLong(), anyLong());
     }
 

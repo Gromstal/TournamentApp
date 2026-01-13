@@ -10,6 +10,7 @@ import org.example.tournamentapp.model.PlayerDto;
 import org.example.tournamentapp.model.record.TournamentContext;
 import org.example.tournamentapp.repository.PlayerRepository;
 import org.example.tournamentapp.repository.TournamentRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,17 +25,20 @@ public class TournamentDataService {
     private final PlayerRepository playerRepository;
     private final PlayerMapper playerMapper;
 
+    @Cacheable(value = "tournament", key = "#tournamentId")
     public Tournament getTournamentById(Long tournamentId) {
-        return tournamentRepository.findById(tournamentId).orElseThrow(()-> new TournamentNotFoundException("Tournament not found with id: "+ tournamentId));
+        return tournamentRepository.findById(tournamentId)
+                .orElseThrow(()-> new TournamentNotFoundException("Tournament " + tournamentId + " not found"));
     }
 
-    public int getCurrentTourByTourId(Long tournamentId) {
+    public int getCurrentTourByTournamentId(Long tournamentId) {
         return tournamentRepository.getCurrentTourById(tournamentId);
     }
 
     public TournamentContext getTournamentContext(Long tournamentId) {
-        int currentTour = getCurrentTourByTourId(tournamentId);
+        int currentTour = getCurrentTourByTournamentId(tournamentId);
         int total = getTourCountById(tournamentId);
+
         return new TournamentContext(currentTour, total, tournamentId);
     }
 
@@ -49,5 +53,7 @@ public class TournamentDataService {
     public List<PlayerEntity> getAllPlayersByTournamentId(Long tournamentId) {
         return playerRepository.findAllByTournamentId(tournamentId);
     }
+
+
 
 }

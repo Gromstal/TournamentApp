@@ -5,11 +5,15 @@
     <title>Список участников</title>
     <link rel="stylesheet" href="setupPage.css">
 </head>
+<style>
+    .field-error { color: red; font-size: 12px; margin-top: 4px; }
+</style>
 <body>
 
 <h1>Список участников</h1>
 
 <form id="playerForm" th:action="@{/setup}" method="post" th:object="${wrapper}">
+
     <div class="table-with-button" style="position: relative; width: 70%; margin: 0 auto;">
         <table id="playerTable">
             <thead>
@@ -18,10 +22,28 @@
                 <th>Фракция</th>
             </tr>
             </thead>
+
             <tbody id="playerTableBody">
-            <tr class="player-row" ondblclick="removeRow(this)" th:each="player, iterStat : ${wrapper.playerList}">
-                <td><input type="text" th:field="*{playerList[__${iterStat.index}__].name}" maxlength="50"/></td>
-                <td><input type="text" th:field="*{playerList[__${iterStat.index}__].faction}" maxlength="50"/></td>
+            <tr class="player-row"
+                ondblclick="removeRow(this)"
+                th:each="player, iterStat : ${wrapper.playerList}">
+
+                <td>
+                    <input type="text"
+                           th:field="*{playerList[__${iterStat.index}__].name}"
+                           maxlength="35"/>
+
+                    <div class="field-error"
+                         th:errors="*{playerList[__${iterStat.index}__].name}">
+                    </div>
+                </td>
+
+                <td>
+                    <input type="text"
+                           th:field="*{playerList[__${iterStat.index}__].faction}"
+                           maxlength="35"/>
+                </td>
+
             </tr>
             </tbody>
         </table>
@@ -48,6 +70,10 @@
                   style="font-size: 12px; white-space: nowrap;"></span>
         </div>
     </div>
+    <div class="field-error"
+         style="width: 70%; margin: 6px auto 0;"
+         th:errors="*{playerList}">
+    </div>
 
     <div style="text-align: center; margin-top: 20px;">
         <label for="tourCount">Количество туров:</label>
@@ -63,11 +89,10 @@
     </div>
 </form>
 
-
 <template id="rowTemplate">
     <tr class="player-row" ondblclick="removeRow(this)">
-        <td><input type="text" name="playerList[0].name" maxlength="50"/></td>
-        <td><input type="text" name="playerList[0].faction" maxlength="50"/></td>
+        <td><input type="text" name="playerList[0].name" maxlength="35"/></td>
+        <td><input type="text" name="playerList[0].faction" maxlength="35"/></td>
     </tr>
 </template>
 
@@ -75,6 +100,7 @@
 <script th:src="@{/js-scripts/addAndDeleteRows.js}"></script>
 <script th:src="@{/js-scripts/copyPasteRows.js}"></script>
 <script th:src="@{/js-scripts/importExcelFile.js}"></script>
+<script th:src="@{/js-scripts/tourCountValidation.js}"></script>
 
 </body>
 </html>

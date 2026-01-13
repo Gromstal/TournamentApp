@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -35,6 +35,6 @@ public class Tournament {
     private boolean tournamentIsEnded= false;
 
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlayerEntity> players = new ArrayList<>();
+    private Set<PlayerEntity> players = new HashSet<>();
 
 }

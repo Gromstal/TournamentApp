@@ -1,6 +1,5 @@
 package org.example.tournamentapp.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tournamentapp.model.record.ManualPairsSetupOption;
@@ -9,10 +8,12 @@ import org.example.tournamentapp.model.PlayerDto;
 import org.example.tournamentapp.service.CreatingPairingService;
 import org.example.tournamentapp.service.ManualSetupService;
 import org.example.tournamentapp.service.TournamentDataService;
+import org.example.tournamentapp.validation.SelectGroup;
 import org.example.tournamentapp.wrapper.PairsWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -37,6 +38,7 @@ public class ManualSetupController {
     public String getManualSetup(Model model,
                                  @RequestParam Long tournamentId) {
         ManualPairsSetupOption manualSetupOption = manualSetupService.getSetupPairWrapper(tournamentId);
+
         model.addAttribute("pairsWrapper", manualSetupOption.pairsWrapper());
         model.addAttribute("playerList", manualSetupOption.playerDtoList());
         model.addAttribute("tournamentId", tournamentId);
@@ -45,7 +47,7 @@ public class ManualSetupController {
     }
 
     @PostMapping
-    public String saveManualPairing(@Valid @ModelAttribute("pairsWrapper") PairsWrapper wrapper,
+    public String saveManualPairing(@Validated(SelectGroup.class) @ModelAttribute("pairsWrapper") PairsWrapper wrapper,
                                     BindingResult bindingResult,
                                     Model model,
                                     @RequestParam Long tournamentId,

@@ -14,7 +14,6 @@ class SortingPlayerDtoServiceTest {
 
     @InjectMocks
     private SortingPlayerService sortingPlayerService;
-
     private final TestData testData = new TestData();
 
     @Test

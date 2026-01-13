@@ -30,11 +30,14 @@ public class TournamentFinishingService {
     }
 
     public boolean isEnded(Long tournamentId) {
+        if (tournamentRepository.findById(tournamentId).isEmpty()) {
+            throw new TournamentNotFoundException("Tournament " + tournamentId + " not found");
+        }
         return tournamentRepository.getIsEndedById(tournamentId);
     }
 
     public void saveIsEnded(Long tournamentId) {
-        Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+        Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(() -> new TournamentNotFoundException("Tournament " + tournamentId + " not found"));
         tournament.setTournamentIsEnded(true);
         tournamentRepository.save(tournament);
 

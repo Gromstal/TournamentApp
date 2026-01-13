@@ -1,6 +1,7 @@
 package org.example.tournamentapp.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.tournamentapp.mapper.PairingMapper;
 import org.example.tournamentapp.model.PairDto;
 import org.example.tournamentapp.repository.PairingRepository;
@@ -15,6 +16,7 @@ import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MergePairingService {
 
     private final PairingRepository pairingRepository;
@@ -25,6 +27,11 @@ public class MergePairingService {
     }
 
     public void mergePairs(List<PairDto> sessionPairs, PairsWrapper pairsWrapper) {
+        log.debug(
+                "Merging pair results: sessionPairs={}, formPairs={}",
+                sessionPairs.size(),
+                pairsWrapper.getPairs().size()
+        );
         IntStream.range(0, sessionPairs.size()).forEach(i -> {
             PairDto sessionPair = sessionPairs.get(i);
             PairDto formPair = pairsWrapper.getPairs().get(i);
