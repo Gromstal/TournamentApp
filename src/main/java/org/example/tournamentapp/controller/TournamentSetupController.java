@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -62,7 +63,7 @@ public class TournamentSetupController {
             return "setupPage";
         }
 
-        ManualSetupOption manualSetupOption = tournamentCreatingService.create(cleaned, tourCount, manualSetup);
+        ManualSetupOption manualSetupOption = tournamentCreatingService.create(new ArrayList<>(cleaned), tourCount, manualSetup);
 
         redirectAttributes.addAttribute("tournamentId", manualSetupOption.tournamentId());
         return manualSetupOption.isManual() ? "redirect:/hsetup" : "redirect:/nextTour";
