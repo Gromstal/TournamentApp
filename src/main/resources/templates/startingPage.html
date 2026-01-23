@@ -2,75 +2,46 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Стартовая страница</title>
-    <link rel="stylesheet" href="setupPage.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 40px;
-        }
-
-        form {
-            display: inline-block;
-        }
-
-        button {
-            width: 250px;
-            padding: 10px;
-            margin: 10px;
-            font-size: 16px;
-        }
-
-        select {
-            padding: 10px;
-            font-size: 16px;
-            width: 260px;
-        }
-
-        .block {
-            margin-top: 30px;
-        }
-
-        .description {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #444;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/warcrow-ui.css}">
 </head>
 <body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Добро пожаловать!</h1>
+        </div>
 
-<h1>Добро пожаловать!</h1>
+        <div class="page-content">
+            <div class="card text-center">
+                <div class="card-body">
+                    <form th:action="@{/setup}" method="get" style="margin-bottom: var(--spacing-xl);">
+                        <button type="submit" class="btn btn-gold" style="width: 280px; padding: var(--spacing-md) var(--spacing-xl);">
+                            Создать турнир
+                        </button>
+                    </form>
 
-<div class="block">
-    <form th:action="@{/setup}" method="get">
-        <button type="submit">Создать турнир</button>
-    </form>
-</div>
+                    <p class="text-center" style="max-width: 600px; margin: 0 auto var(--spacing-xl); color: var(--color-text-secondary);">
+                        ...или, если турнир уже идет и вы хотите продолжить заполнять результаты, то выберите турнир из списка
+                    </p>
 
-<div class="description">
-    ...или, если турнир уже идет и вы хотите продолжить заполнять результаты, то выберите турнир из списка
-</div>
-
-<div class="block">
-    <form th:action="@{/}" method="post">
-        <select name="tournamentId" required>
-            <option value="" disabled selected>-- выберите турнир --</option>
-
-            <option th:each="t : ${tournaments}"
-                    th:value="${t.id}"
-                    th:text="${t.date}">
-            </option>
-        </select>
-
-        <br>
-        <button type="submit">Перейти к турниру</button>
-    </form>
-</div>
-
+                    <form th:action="@{/}" method="post" style="margin-top: var(--spacing-xl);">
+                        <div style="margin-bottom: var(--spacing-md);">
+                            <select name="tournamentId" required style="width: 280px; margin: 0 auto; display: block; padding: var(--spacing-md);">
+                                <option value="" disabled selected>-- выберите турнир --</option>
+                                <option th:each="t : ${tournaments}"
+                                        th:value="${t.id}"
+                                        th:text="${t.date}">
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn" style="width: 280px; padding: var(--spacing-md) var(--spacing-xl);">
+                            Перейти к турниру
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

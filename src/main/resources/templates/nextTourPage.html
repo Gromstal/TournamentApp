@@ -2,138 +2,120 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Пары игроков</title>
-    <link rel="stylesheet" href="tourPage.css">
-    <style>
-        .pair-block {
-            border: 2px solid #444;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .pair-block tr {
-            background-color: #f9f9f9;
-        }
-
-        .pair-block tr:first-child {
-            background-color: #e8f0fe;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 60%;
-        }
-
-        th, td {
-            padding: 8px 12px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-
-        h2 {
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/warcrow-ui.css}">
 </head>
 <body>
+    <div class="container">
+        <div class="page-header">
+            <h2>Тур № [[${currentTour}]]</h2>
+        </div>
 
-<h2>Тур № [[${currentTour}]]</h2>
-
-<form th:action="@{/nextTour}" method="post" th:object="${pairsWrapper}">
-    <input type="hidden" name="tournamentId" th:value="${tournamentId}"/>
-    <table>
-        <thead>
-        <tr>
-            <th>Игрок</th>
-            <th>ТР</th>
-            <th>VP</th>
-            <th>МР</th>
-            <th>AP</th>
-        </tr>
-        </thead>
-        <tbody>
-        </tbody>
-        <th:block th:each="pair, pairStat : ${pairsWrapper.pairs}">
-            <tbody class="pair-block">
-
-            <tr>
-                <td>
-                    <span th:text="${pair.firstPlayer.name}">Игрок 1</span>
-                    <input type="hidden"
-                           th:field="*{pairs[__${pairStat.index}__].firstPlayer.id}"/>
-                    <input type="hidden"
-                           th:field="*{pairs[__${pairStat.index}__].firstPlayer.name}"/>
-                    <input type="hidden"
-                           th:field="*{pairs[__${pairStat.index}__].firstPlayer.tp}"/>
-                    <input type="hidden"
-                           th:field="*{pairs[__${pairStat.index}__].firstPlayer.vp}"/>
-                </td>
-
-                <td th:text="${pair.firstPlayer.tp}">0</td>
-                <td th:text="${pair.firstPlayer.vp}">0</td>
-
-                <td>
-                    <input type="number"
-                           th:field="*{pairs[__${pairStat.index}__].firstPlayer.mp}"/>
-                    <div class="field-error"
-                         th:errors="*{pairs[__${pairStat.index}__].firstPlayer.mp}">
+        <div class="page-content">
+            <form th:action="@{/nextTour}" method="post" th:object="${pairsWrapper}">
+                <input type="hidden" name="tournamentId" th:value="${tournamentId}"/>
+                <input type="hidden" name="pageTour" th:value="${currentTour}"/>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="match-cards-container">
+                            <th:block th:each="pair, pairStat : ${pairsWrapper.pairs}">
+                                <div class="match-card">
+                                    <table class="match-table">
+                                        <thead>
+                                        <tr>
+                                            <th class="col-player">Игрок</th>
+                                            <th class="col-stat">ТР</th>
+                                            <th class="col-stat">VP</th>
+                                            <th class="col-input">МР</th>
+                                            <th class="col-input">AP</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr class="player-row player-row-first">
+                                            <td class="col-player">
+                                                <div class="player-block">
+                                                    <strong class="player-name" th:text="${pair.firstPlayer.name}">Игрок 1</strong>
+                                                </div>
+                                                <input type="hidden"
+                                                       th:field="*{pairs[__${pairStat.index}__].firstPlayer.id}"/>
+                                                <input type="hidden"
+                                                       th:field="*{pairs[__${pairStat.index}__].firstPlayer.name}"/>
+                                                <input type="hidden"
+                                                       th:field="*{pairs[__${pairStat.index}__].firstPlayer.tp}"/>
+                                                <input type="hidden"
+                                                       th:field="*{pairs[__${pairStat.index}__].firstPlayer.vp}"/>
+                                            </td>
+                                            <td class="stat-value col-stat" th:text="${pair.firstPlayer.tp}">0</td>
+                                            <td class="stat-value col-stat" th:text="${pair.firstPlayer.vp}">0</td>
+                                            <td class="col-input">
+                                                <input type="number"
+                                                       th:field="*{pairs[__${pairStat.index}__].firstPlayer.mp}"
+                                                       class="score-input"/>
+                                                <div class="field-error"
+                                                     th:errors="*{pairs[__${pairStat.index}__].firstPlayer.mp}">
+                                                </div>
+                                            </td>
+                                            <td class="col-input">
+                                                <input type="number"
+                                                       th:field="*{pairs[__${pairStat.index}__].firstPlayer.ap}"
+                                                       class="score-input"/>
+                                                <div class="field-error"
+                                                     th:errors="*{pairs[__${pairStat.index}__].firstPlayer.ap}">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="player-row player-row-second">
+                                            <td class="col-player">
+                                                <div class="player-block">
+                                                    <strong class="player-name" th:text="${pair.secondPlayer.name}">Игрок 2</strong>
+                                                </div>
+                                                <input type="hidden"
+                                                       th:field="*{pairs[__${pairStat.index}__].secondPlayer.id}"/>
+                                                <input type="hidden"
+                                                       th:field="*{pairs[__${pairStat.index}__].secondPlayer.name}"/>
+                                                <input type="hidden"
+                                                       th:field="*{pairs[__${pairStat.index}__].secondPlayer.tp}"/>
+                                                <input type="hidden"
+                                                       th:field="*{pairs[__${pairStat.index}__].secondPlayer.vp}"/>
+                                            </td>
+                                            <td class="stat-value col-stat" th:text="${pair.secondPlayer.tp}">0</td>
+                                            <td class="stat-value col-stat" th:text="${pair.secondPlayer.vp}">0</td>
+                                            <td class="col-input">
+                                                <input type="number"
+                                                       th:field="*{pairs[__${pairStat.index}__].secondPlayer.mp}"
+                                                       class="score-input"/>
+                                                <div class="field-error"
+                                                     th:errors="*{pairs[__${pairStat.index}__].secondPlayer.mp}">
+                                                </div>
+                                            </td>
+                                            <td class="col-input">
+                                                <input type="number"
+                                                       th:field="*{pairs[__${pairStat.index}__].secondPlayer.ap}"
+                                                       class="score-input"/>
+                                                <div class="field-error"
+                                                     th:errors="*{pairs[__${pairStat.index}__].secondPlayer.ap}">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </th:block>
+                        </div>
                     </div>
-                </td>
+                </div>
 
-                <td>
-                    <input type="number"
-                           th:field="*{pairs[__${pairStat.index}__].firstPlayer.ap}"/>
-                    <div class="field-error"
-                         th:errors="*{pairs[__${pairStat.index}__].firstPlayer.ap}">
-                    </div>
-                </td>
-            </tr>
-
-            <tr>
-                <td>
-                    <span th:text="${pair.secondPlayer.name}">Игрок 2</span>
-                    <input type="hidden"
-                           th:field="*{pairs[__${pairStat.index}__].secondPlayer.id}"/>
-                    <input type="hidden"
-                           th:field="*{pairs[__${pairStat.index}__].secondPlayer.name}"/>
-                    <input type="hidden"
-                           th:field="*{pairs[__${pairStat.index}__].secondPlayer.tp}"/>
-                    <input type="hidden"
-                           th:field="*{pairs[__${pairStat.index}__].secondPlayer.vp}"/>
-                </td>
-
-                <td th:text="${pair.secondPlayer.tp}">0</td>
-                <td th:text="${pair.secondPlayer.vp}">0</td>
-
-                <td>
-                    <input type="number"
-                           th:field="*{pairs[__${pairStat.index}__].secondPlayer.mp}"/>
-                    <div class="field-error"
-                         th:errors="*{pairs[__${pairStat.index}__].secondPlayer.mp}">
-                    </div>
-                </td>
-
-                <td>
-                    <input type="number"
-                           th:field="*{pairs[__${pairStat.index}__].secondPlayer.ap}"/>
-                    <div class="field-error"
-                         th:errors="*{pairs[__${pairStat.index}__].secondPlayer.ap}">
-                    </div>
-                </td>
-            </tr>
-
-            </tbody>
-        </th:block>
-    </table>
-
-    <div style="text-align: center; margin-top: 20px;">
-        <button type="submit">Подвести итог</button>
+                <div class="text-center" style="margin-top: var(--spacing-xl);">
+                    <button type="submit" class="btn btn-gold" style="padding: var(--spacing-md) var(--spacing-xl); font-size: var(--font-size-lg);">
+                        Подвести итог
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</form>
 
-<script th:src="@{js-scripts/fieldValidation.js}"></script>
-
-
+    <script th:src="@{js-scripts/fieldValidation.js}"></script>
 </body>
 </html>
