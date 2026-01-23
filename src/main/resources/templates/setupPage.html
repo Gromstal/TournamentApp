@@ -2,105 +2,122 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Список участников</title>
-    <link rel="stylesheet" href="setupPage.css">
+    <link rel="stylesheet" th:href="@{/css/warcrow-ui.css}">
 </head>
-<style>
-    .field-error { color: red; font-size: 12px; margin-top: 4px; }
-</style>
 <body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Список участников</h1>
+        </div>
 
-<h1>Список участников</h1>
+        <div class="page-content">
+            <form id="playerForm" th:action="@{/setup}" method="post" th:object="${wrapper}">
+                <div class="card">
+                    <div class="card-body">
+                        <div style="position: relative; display: flex; gap: var(--spacing-lg); align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <table id="playerTable">
+                                    <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Фракция</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="playerTableBody">
+                                    <tr class="player-row"
+                                        ondblclick="removeRow(this)"
+                                        th:each="player, iterStat : ${wrapper.playerList}">
+                                        <td>
+                                            <input type="text"
+                                                   th:field="*{playerList[__${iterStat.index}__].name}"
+                                                   maxlength="35"
+                                                   style="width: 100%; text-align: left;"/>
+                                            <div class="field-error"
+                                                 th:errors="*{playerList[__${iterStat.index}__].name}">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text"
+                                                   th:field="*{playerList[__${iterStat.index}__].faction}"
+                                                   maxlength="35"
+                                                   style="width: 100%; text-align: left;"/>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <div class="field-error text-center"
+                                     style="margin-top: var(--spacing-sm);"
+                                     th:errors="*{playerList}">
+                                </div>
+                            </div>
 
-<form id="playerForm" th:action="@{/setup}" method="post" th:object="${wrapper}">
+                            <div style="display: flex; flex-direction: column; gap: var(--spacing-sm); min-width: 200px;">
+                                <button type="button"
+                                        class="btn btn-secondary"
+                                        onclick="addRow()"
+                                        style="width: 100%;">
+                                    Добавить игрока
+                                </button>
 
-    <div class="table-with-button" style="position: relative; width: 70%; margin: 0 auto;">
-        <table id="playerTable">
-            <thead>
-            <tr>
-                <th>Имя</th>
-                <th>Фракция</th>
-            </tr>
-            </thead>
+                                <input id="excelFile"
+                                       type="file"
+                                       name="excelFile"
+                                       accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                                       hidden>
 
-            <tbody id="playerTableBody">
-            <tr class="player-row"
-                ondblclick="removeRow(this)"
-                th:each="player, iterStat : ${wrapper.playerList}">
+                                <button type="button"
+                                        class="btn btn-secondary"
+                                        onclick="document.getElementById('excelFile').click()"
+                                        style="width: 100%;">
+                                    Добавить из файла
+                                </button>
 
-                <td>
-                    <input type="text"
-                           th:field="*{playerList[__${iterStat.index}__].name}"
-                           maxlength="35"/>
-
-                    <div class="field-error"
-                         th:errors="*{playerList[__${iterStat.index}__].name}">
+                                <span id="excelStatus"
+                                      style="font-size: var(--font-size-sm); white-space: nowrap; color: var(--color-text-muted); text-align: center; margin-top: var(--spacing-xs);">
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                </td>
+                </div>
 
-                <td>
-                    <input type="text"
-                           th:field="*{playerList[__${iterStat.index}__].faction}"
-                           maxlength="35"/>
-                </td>
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: var(--spacing-md); align-items: center;">
+                            <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                                <label for="tourCount" style="margin: 0;">Количество туров:</label>
+                                <input type="number" id="tourCount" name="tourCount" min="1" required style="width: 100px;">
+                            </div>
 
-            </tr>
-            </tbody>
-        </table>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                                <input type="checkbox" name="tourFlag"> 
+                                <span>Сформировать пары вручную</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
-        <div style="position: absolute;top: 0;left: 95%;display: flex;flex-direction: column;gap: 8px;align-items: flex-start;">
-            <button type="button"
-                    class="add-player-btn"
-                    onclick="addRow()">
-                Добавить игрока
-            </button>
-
-            <input id="excelFile"
-                   type="file"
-                   name="excelFile"
-                   accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-                   hidden>
-
-            <button type="button"
-                    onclick="document.getElementById('excelFile').click()">
-                Добавить из файла
-            </button>
-
-            <span id="excelStatus"
-                  style="font-size: 12px; white-space: nowrap;"></span>
+                <div class="text-center" style="margin-top: var(--spacing-xl);">
+                    <button type="submit" class="btn btn-gold" style="padding: var(--spacing-md) var(--spacing-xl); font-size: var(--font-size-lg);">
+                        Сформировать пары
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-    <div class="field-error"
-         style="width: 70%; margin: 6px auto 0;"
-         th:errors="*{playerList}">
-    </div>
 
-    <div style="text-align: center; margin-top: 20px;">
-        <label for="tourCount">Количество туров:</label>
-        <input type="number" id="tourCount" name="tourCount" min="1" required>
+    <template id="rowTemplate">
+        <tr class="player-row" ondblclick="removeRow(this)">
+            <td><input type="text" name="playerList[0].name" maxlength="35" style="width: 100%; text-align: left;"/></td>
+            <td><input type="text" name="playerList[0].faction" maxlength="35" style="width: 100%; text-align: left;"/></td>
+        </tr>
+    </template>
 
-        <label>
-            <input type="checkbox" name="tourFlag"> Сформировать пары вручную
-        </label>
-    </div>
-
-    <div style="text-align: center; margin-top: 20px;">
-        <button type="submit">Сформировать пары</button>
-    </div>
-</form>
-
-<template id="rowTemplate">
-    <tr class="player-row" ondblclick="removeRow(this)">
-        <td><input type="text" name="playerList[0].name" maxlength="35"/></td>
-        <td><input type="text" name="playerList[0].faction" maxlength="35"/></td>
-    </tr>
-</template>
-
-<script th:src="@{js-scripts/xlsx.full.min.js}"></script>
-<script th:src="@{/js-scripts/addAndDeleteRows.js}"></script>
-<script th:src="@{/js-scripts/copyPasteRows.js}"></script>
-<script th:src="@{/js-scripts/importExcelFile.js}"></script>
-<script th:src="@{/js-scripts/tourCountValidation.js}"></script>
-
+    <script th:src="@{js-scripts/xlsx.full.min.js}"></script>
+    <script th:src="@{/js-scripts/addAndDeleteRows.js}"></script>
+    <script th:src="@{/js-scripts/copyPasteRows.js}"></script>
+    <script th:src="@{/js-scripts/importExcelFile.js}"></script>
+    <script th:src="@{/js-scripts/tourCountValidation.js}"></script>
 </body>
 </html>

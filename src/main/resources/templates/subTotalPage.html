@@ -1,72 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>FINAL</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        table {
-            margin: 0 auto;
-            border-collapse: collapse;
-            width: 80%;
-        }
-
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-        }
-
-        .points-col {
-            width: 60px;
-        }
-    </style>
-    <link rel="stylesheet" href="setupPage.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Итоги тура</title>
+    <link rel="stylesheet" th:href="@{/css/warcrow-ui.css}">
 </head>
 <body>
+    <div class="container">
+        <div class="page-header">
+            <h2>Итоги тура</h2>
+            <p th:if="${currentTour}" style="text-align: center; color: var(--color-text-muted); margin-top: var(--spacing-sm);">
+                Тур № <span th:text="${currentTour}"></span>
+            </p>
+        </div>
 
-<h2>Итоги тура</h2>
+        <div class="page-content">
+            <div class="card">
+                <div class="card-body">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Игрок</th>
+                            <th style="width: 100px;">Фракция</th>
+                            <th style="width: 80px;">ТР</th>
+                            <th style="width: 80px;">VP</th>
+                            <th style="width: 80px;">MP</th>
+                            <th style="width: 80px;">AP</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <th:block th:each="player : ${wrapper.playerList}">
+                            <tr>
+                                <td th:text="${player.name}">Игрок</td>
+                                <td th:text="${player.faction}">Фракция</td>
+                                <td th:text="${player.tp}">ТР</td>
+                                <td th:text="${player.vp}">VP</td>
+                                <td th:text="${player.totalMp}">MP</td>
+                                <td th:text="${player.totalAp}">AP</td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-<table>
-    <thead>
-    <tr>
-        <th>Игрок</th>
-        <th class="points-col">Фракция</th>
-        <th class="points-col">ТР</th>
-        <th class="points-col">VP</th>
-        <th class="points-col">MP</th>
-        <th class="points-col">AP</th>
-    </tr>
-    </thead>
-    <tbody>
-
-    <th:block th:each="player : ${wrapper.playerList}">
-        <tr>
-            <td th:text="${player.name}">Игрок</td>
-            <td class="points-col" th:text="${player.faction}">Фракция</td>
-            <td class="points-col" th:text="${player.tp}">ТР</td>
-            <td class="points-col" th:text="${player.vp}">VP</td>
-            <td class="points-col" th:text="${player.totalMp}">MP</td>
-            <td class="points-col" th:text="${player.totalAp}">AP</td>
-        </tr>
-    </th:block>
-
-    </tbody>
-</table>
-<form th:action="@{/nextTour}" method="get">
-    <input type="hidden" name="tournamentId" th:value="${tournamentId}" />
-    <div style="text-align: center; margin-top: 20px;">
-        <button type="submit">К следующему туру</button>
+            <div class="text-center" style="margin-top: var(--spacing-xl);">
+                <form th:action="@{/nextTour}" method="get" style="display: inline-block;">
+                    <input type="hidden" name="tournamentId" th:value="${tournamentId}" />
+                    <button type="submit" class="btn btn-gold" style="padding: var(--spacing-md) var(--spacing-xl); font-size: var(--font-size-lg);">
+                        К следующему туру
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
-</form>
-
-
 </body>
 </html>

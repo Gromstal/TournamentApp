@@ -2,160 +2,136 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ручная настройка пар</title>
-  <link rel="stylesheet" href="tourPage.css">
+  <link rel="stylesheet" th:href="@{/css/warcrow-ui.css}">
   <style>
-    .pair-block {
-      border: 2px solid #444;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .pair-block tr {
-      background-color: #f9f0fe;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    th, td {
-      padding: 8px 12px;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
-    }
-
-    h2 {
-      text-align: center;
-    }
-
-    select {
-      width: 100%;
-      padding: 6px;
-      font-size: 16px;
-    }
-
     select.error {
-      border: 2px solid red;
+      border-color: var(--color-error) !important;
+      box-shadow: 0 0 8px rgba(201, 74, 74, 0.5) !important;
     }
   </style>
 </head>
 <body>
+    <div class="container">
+        <div class="page-header">
+            <h2>Ручная настройка пар</h2>
+        </div>
 
-<h2>Ручная настройка пар</h2>
+        <div class="page-content">
+            <form th:action="@{/hsetup}" method="post" th:object="${pairsWrapper}">
+                <input type="hidden" name="tournamentId" th:value="${tournamentId}" />
+                
+                <div class="card">
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Игрок 1</th>
+                                <th>Игрок 2</th>
+                            </tr>
+                            </thead>
+                            <th:block th:each="pair, pairStat : ${pairsWrapper.pairs}">
+                                <tbody class="pair-block">
+                                <tr>
+                                    <td>
+                                        <select class="first" th:field="*{pairs[__${pairStat.index}__].firstPlayer.id}" style="width: 100%;">
+                                            <option value="">-- выберите игрока --</option>
+                                            <option th:each="player : ${playerList}"
+                                                    th:value="${player.id}"
+                                                    th:text="${player.name}">
+                                            </option>
+                                        </select>
+                                        <div class="field-error"
+                                             th:errors="*{pairs[__${pairStat.index}__].firstPlayer.id}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <select class="second" th:field="*{pairs[__${pairStat.index}__].secondPlayer.id}" style="width: 100%;">
+                                            <option value="">-- выберите игрока --</option>
+                                            <option th:each="player : ${playerList}"
+                                                    th:value="${player.id}"
+                                                    th:text="${player.name}">
+                                            </option>
+                                        </select>
+                                        <div class="field-error"
+                                             th:errors="*{pairs[__${pairStat.index}__].secondPlayer.id}">
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </th:block>
+                        </table>
+                    </div>
+                </div>
 
-<form th:action="@{/hsetup}" method="post" th:object="${pairsWrapper}">
-  <input type="hidden" name="tournamentId" th:value="${tournamentId}" />
-  <table>
-    <thead>
-    <tr>
-      <th>Игрок 1</th>
-      <th>Игрок 2</th>
-    </tr>
-    </thead>
+                <div class="text-center" style="margin-top: var(--spacing-xl);">
+                    <button type="submit" class="btn btn-gold" style="padding: var(--spacing-md) var(--spacing-xl); font-size: var(--font-size-lg);">
+                        Сохранить пары
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <th:block th:each="pair, pairStat : ${pairsWrapper.pairs}">
-      <tbody class="pair-block">
-      <tr>
-        <td>
-          <select class="first" th:field="*{pairs[__${pairStat.index}__].firstPlayer.id}">
-            <option value="">-- выберите игрока --</option>
-            <option th:each="player : ${playerList}"
-                    th:value="${player.id}"
-                    th:text="${player.name}">
-            </option>
-          </select>
-          <div class="field-error"
-               th:errors="*{pairs[__${pairStat.index}__].firstPlayer.id}">
-          </div>
-        </td>
-        <td>
-          <select class="second" th:field="*{pairs[__${pairStat.index}__].secondPlayer.id}">
-            <option value="">-- выберите игрока --</option>
-            <option th:each="player : ${playerList}"
-                    th:value="${player.id}"
-                    th:text="${player.name}">
-            </option>
-          </select>
-          <div class="field-error"
-               th:errors="*{pairs[__${pairStat.index}__].secondPlayer.id}">
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </th:block>
-  </table>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const selects = Array.from(document.querySelectorAll('select.first, select.second'));
 
-  <div style="text-align: center; margin-top: 20px;">
-    <button type="submit">Сохранить пары</button>
-  </div>
-</form>
+        function updateOptions() {
+          const selectedPlayers = new Set(selects.map(s => s.value).filter(v => v !== ''));
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const selects = Array.from(document.querySelectorAll('select.first, select.second'));
+          selects.forEach(select => {
+            const currentValue = select.value;
+            Array.from(select.options).forEach(option => {
+              if (option.value === '' || option.value === currentValue) {
+                option.disabled = false;
+                option.style.display = '';
+              } else if (selectedPlayers.has(option.value)) {
+                option.disabled = false;
+                option.style.display = 'none';
+              } else {
+                option.disabled = false;
+                option.style.display = '';
+              }
+            });
+          });
 
-    function updateOptions() {
+          document.querySelectorAll('.pair-block').forEach(block => {
+            const firstSelect = block.querySelector('select.first');
+            const secondSelect = block.querySelector('select.second');
+            if (firstSelect.value !== '' && firstSelect.value === secondSelect.value) {
+              firstSelect.classList.add('error');
+              secondSelect.classList.add('error');
+            } else {
+              firstSelect.classList.remove('error');
+              secondSelect.classList.remove('error');
+            }
+          });
+        }
 
-      const selectedPlayers = new Set(selects.map(s => s.value).filter(v => v !== ''));
+        selects.forEach(select => {
+          select.addEventListener('change', updateOptions);
+        });
 
+        updateOptions();
 
-      selects.forEach(select => {
-        const currentValue = select.value;
-        Array.from(select.options).forEach(option => {
-          if (option.value === '' || option.value === currentValue) {
-            option.disabled = false;
-            option.style.display = '';
-          } else if (selectedPlayers.has(option.value)) {
-            option.disabled = false;
-            option.style.display = 'none';
-          } else {
-            option.disabled = false;
-            option.style.display = '';
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+          let valid = true;
+          document.querySelectorAll('.pair-block').forEach(block => {
+            const firstSelect = block.querySelector('select.first');
+            const secondSelect = block.querySelector('select.second');
+            if (firstSelect.value !== '' && firstSelect.value === secondSelect.value) {
+              valid = false;
+            }
+          });
+          if (!valid) {
+            e.preventDefault();
+            alert('Ошибка: В одной паре игрок не может играть сам с собой!');
           }
         });
       });
-
-
-      document.querySelectorAll('.pair-block').forEach(block => {
-        const firstSelect = block.querySelector('select.first');
-        const secondSelect = block.querySelector('select.second');
-        if (firstSelect.value !== '' && firstSelect.value === secondSelect.value) {
-          firstSelect.classList.add('error');
-          secondSelect.classList.add('error');
-        } else {
-          firstSelect.classList.remove('error');
-          secondSelect.classList.remove('error');
-        }
-      });
-    }
-
-    selects.forEach(select => {
-      select.addEventListener('change', updateOptions);
-    });
-
-    updateOptions();
-
-
-    const form = document.querySelector('form');
-    form.addEventListener('submit', (e) => {
-      let valid = true;
-      document.querySelectorAll('.pair-block').forEach(block => {
-        const firstSelect = block.querySelector('select.first');
-        const secondSelect = block.querySelector('select.second');
-        if (firstSelect.value !== '' && firstSelect.value === secondSelect.value) {
-          valid = false;
-        }
-      });
-      if (!valid) {
-        e.preventDefault();
-        alert('Ошибка: В одной паре игрок не может играть сам с собой!');
-      }
-    });
-  });
-</script>
-
+    </script>
 </body>
 </html>
