@@ -34,12 +34,12 @@ public class PlayerDto {
 
     @NotNull(groups = ScoreGroup.class, message = "Введите AP")
     @Min(value = 0, groups = ScoreGroup.class, message = "AP не может быть меньше 0")
-    @Max(value = 999, groups = ScoreGroup.class, message = "AP слишком большой")
+    @Max(value = 20, groups = ScoreGroup.class, message = "AP слишком большой")
     private Integer  ap;
 
     @NotNull(groups = ScoreGroup.class, message = "Введите MP")
     @Min(value = 0, groups = ScoreGroup.class, message = "MP не может быть меньше 0")
-    @Max(value = 999, groups = ScoreGroup.class, message = "MP слишком большой")
+    @Max(value = 20, groups = ScoreGroup.class, message = "MP слишком большой")
     private Integer  mp;
 
     private int vp;
