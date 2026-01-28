@@ -25,7 +25,7 @@ public class CalculateService {
         log.info("Tournament {} Points calculated for all players", tournamentId);
     }
 
-    @Transactional
+
     public void calculate(PlayerDto firstPlayerResult, PlayerDto secondPlayerResult) {
         int firstPlayerEarnedVP = firstPlayerResult.getAp() + firstPlayerResult.getMp();
         int secondPlayerEarnedVP = secondPlayerResult.getAp() + secondPlayerResult.getMp();
