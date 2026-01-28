@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tournamentapp.entity.PlayerEntity;
 import org.example.tournamentapp.exception.PlayerNotFoundException;
-import org.example.tournamentapp.mapper.PlayerMapper;
 import org.example.tournamentapp.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class PlayerService {
