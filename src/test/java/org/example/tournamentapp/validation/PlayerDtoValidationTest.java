@@ -135,8 +135,8 @@ class PlayerDtoValidationTest {
     @Test
     void scoreValidTest() {
         PlayerDto dto = PlayerDto.builder()
-                .ap(50)
-                .mp(50)
+                .ap(5)
+                .mp(5)
                 .build();
 
         Set<ConstraintViolation<PlayerDto>> violations = validator.validate(dto, ScoreGroup.class);
@@ -148,7 +148,7 @@ class PlayerDtoValidationTest {
     void scoreNullApTest() {
         PlayerDto dto = PlayerDto.builder()
                 .ap(null)
-                .mp(50)
+                .mp(5)
                 .build();
 
         Set<ConstraintViolation<PlayerDto>> violations = validator.validate(dto, ScoreGroup.class);
@@ -160,7 +160,7 @@ class PlayerDtoValidationTest {
     @Test
     void scoreNullMpTest() {
         PlayerDto dto = PlayerDto.builder()
-                .ap(50)
+                .ap(5)
                 .mp(null)
                 .build();
 
@@ -174,7 +174,7 @@ class PlayerDtoValidationTest {
     void scoreNegativeApTest() {
         PlayerDto dto = PlayerDto.builder()
                 .ap(-1)
-                .mp(50)
+                .mp(5)
                 .build();
 
         Set<ConstraintViolation<PlayerDto>> violations = validator.validate(dto, ScoreGroup.class);
@@ -186,7 +186,7 @@ class PlayerDtoValidationTest {
     @Test
     void scoreNegativeMpTest() {
         PlayerDto dto = PlayerDto.builder()
-                .ap(50)
+                .ap(20)
                 .mp(-1)
                 .build();
 
@@ -199,8 +199,8 @@ class PlayerDtoValidationTest {
     @Test
     void scoreApTooLargeTest() {
         PlayerDto dto = PlayerDto.builder()
-                .ap(1000)
-                .mp(50)
+                .ap(21)
+                .mp(5)
                 .build();
 
         Set<ConstraintViolation<PlayerDto>> violations = validator.validate(dto, ScoreGroup.class);
@@ -212,8 +212,8 @@ class PlayerDtoValidationTest {
     @Test
     void scoreMpTooLargeTest() {
         PlayerDto dto = PlayerDto.builder()
-                .ap(50)
-                .mp(1000)
+                .ap(5)
+                .mp(21)
                 .build();
 
         Set<ConstraintViolation<PlayerDto>> violations = validator.validate(dto, ScoreGroup.class);
@@ -237,8 +237,8 @@ class PlayerDtoValidationTest {
     @Test
     void scoreMaxTest() {
         PlayerDto dto = PlayerDto.builder()
-                .ap(999)
-                .mp(999)
+                .ap(20)
+                .mp(20)
                 .build();
 
         Set<ConstraintViolation<PlayerDto>> violations = validator.validate(dto, ScoreGroup.class);
@@ -285,8 +285,8 @@ class PlayerDtoValidationTest {
         PlayerDto dto = PlayerDto.builder()
                 .id(null)
                 .name("")
-                .ap(50)
-                .mp(50)
+                .ap(5)
+                .mp(5)
                 .build();
 
         Set<ConstraintViolation<PlayerDto>> violations = validator.validate(dto, ScoreGroup.class);

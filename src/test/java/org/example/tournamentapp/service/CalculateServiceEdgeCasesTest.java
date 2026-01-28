@@ -44,7 +44,7 @@ class CalculateServiceEdgeCasesTest {
 
     @Test
     void maxScoresTest() {
-        PlayerDto firstDto = player(1L, 0, 999, 999);
+        PlayerDto firstDto = player(1L, 0, 20, 20);
         PlayerDto secondDto = player(2L, 0, 0, 0);
 
         PlayerEntity firstEntity = entityFromDb(1L, 0, 0);
@@ -57,7 +57,7 @@ class CalculateServiceEdgeCasesTest {
 
         assertThat(firstEntity.getTp()).isEqualTo(4);
         assertThat(secondEntity.getTp()).isEqualTo(0);
-        assertThat(firstEntity.getVp()).isEqualTo(999 + 999);
+        assertThat(firstEntity.getVp()).isEqualTo(20 + 20);
         assertThat(secondEntity.getVp()).isEqualTo(0);
     }
 
