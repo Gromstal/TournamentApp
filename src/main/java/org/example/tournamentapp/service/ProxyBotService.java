@@ -23,8 +23,9 @@ public class ProxyBotService {
 
         if (setupList.size() % 2 != 0) {
             setupList.add(proxyBotBuilder.getProxyBot());
+            log.info("ProxyBot added");
         }
-        log.info("ProxyBot added");
+
         return setupList;
     }
 }

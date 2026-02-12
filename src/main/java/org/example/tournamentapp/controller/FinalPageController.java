@@ -48,6 +48,3 @@ public class FinalPageController {
         return "redirect:/";
     }
 }
-
-
-//${SPRING_PROFILES_ACTIVE}
